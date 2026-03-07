@@ -3,554 +3,117 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Meet Monitor — Girls 4x400 Tracker</title>
+<title>Meet Monitor</title>
 <style>
-  @import url('https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Barlow+Condensed:wght@300;500;700;900&display=swap');
-
-  :root {
-    --bg: #0a0c10;
-    --surface: #111318;
-    --border: #1e2230;
-    --accent: #00e5ff;
-    --accent2: #ff3d71;
-    --warn: #ffaa00;
-    --green: #00e676;
-    --text: #e0e6f0;
-    --muted: #5a6480;
-    --live: #ff3d71;
-  }
-
   * { box-sizing: border-box; margin: 0; padding: 0; }
-
-  body {
-    background: var(--bg);
-    color: var(--text);
-    font-family: 'Barlow Condensed', sans-serif;
-    min-height: 100vh;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    padding: 24px 16px 60px;
-  }
-
-  /* Scanline overlay */
-  body::before {
-    content: '';
-    position: fixed;
-    inset: 0;
-    background: repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0,229,255,0.015) 2px, rgba(0,229,255,0.015) 4px);
-    pointer-events: none;
-    z-index: 999;
-  }
-
-  header {
-    width: 100%;
-    max-width: 720px;
-    margin-bottom: 28px;
-    border-bottom: 1px solid var(--border);
-    padding-bottom: 20px;
-    display: flex;
-    flex-direction: column;
-    gap: 6px;
-  }
-
-  .header-top {
-    display: flex;
-    align-items: baseline;
-    justify-content: space-between;
-    gap: 12px;
-  }
-
-  h1 {
-    font-family: 'Barlow Condensed', sans-serif;
-    font-weight: 900;
-    font-size: 2.4rem;
-    letter-spacing: 0.04em;
-    text-transform: uppercase;
-    color: var(--accent);
-    text-shadow: 0 0 20px rgba(0,229,255,0.4);
-    line-height: 1;
-  }
-
-  .subtitle {
-    font-family: 'Space Mono', monospace;
-    font-size: 0.65rem;
-    color: var(--muted);
-    letter-spacing: 0.08em;
-    text-transform: uppercase;
-  }
-
-  .status-pill {
-    font-family: 'Space Mono', monospace;
-    font-size: 0.65rem;
-    padding: 4px 10px;
-    border-radius: 2px;
-    border: 1px solid;
-    text-transform: uppercase;
-    letter-spacing: 0.1em;
-    white-space: nowrap;
-  }
-  .status-pill.idle { color: var(--muted); border-color: var(--muted); }
-  .status-pill.monitoring { color: var(--accent); border-color: var(--accent); animation: pulse-border 2s infinite; }
-  .status-pill.alerted { color: var(--accent2); border-color: var(--accent2); animation: pulse-border-red 1s infinite; }
-
-  @keyframes pulse-border {
-    0%, 100% { box-shadow: 0 0 0 0 rgba(0,229,255,0.3); }
-    50% { box-shadow: 0 0 0 4px rgba(0,229,255,0.1); }
-  }
-  @keyframes pulse-border-red {
-    0%, 100% { box-shadow: 0 0 0 0 rgba(255,61,113,0.4); }
-    50% { box-shadow: 0 0 0 6px rgba(255,61,113,0.1); }
-  }
-
-  .main-card {
-    width: 100%;
-    max-width: 720px;
-    background: var(--surface);
-    border: 1px solid var(--border);
-    padding: 24px;
-    margin-bottom: 16px;
-  }
-
-  .config-row {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 12px;
-    margin-bottom: 16px;
-  }
-
-  .field-group {
-    display: flex;
-    flex-direction: column;
-    gap: 6px;
-  }
-
-  label {
-    font-family: 'Space Mono', monospace;
-    font-size: 0.6rem;
-    color: var(--muted);
-    text-transform: uppercase;
-    letter-spacing: 0.1em;
-  }
-
-  input {
-    background: #0d0f14;
-    border: 1px solid var(--border);
-    color: var(--text);
-    font-family: 'Space Mono', monospace;
-    font-size: 0.8rem;
-    padding: 10px 12px;
-    outline: none;
-    width: 100%;
-    transition: border-color 0.2s;
-  }
-  input:focus { border-color: var(--accent); }
-
-  .input-full { grid-column: 1 / -1; }
-
-  .controls {
-    display: flex;
-    gap: 10px;
-    margin-top: 4px;
-  }
-
-  button {
-    font-family: 'Barlow Condensed', sans-serif;
-    font-weight: 700;
-    font-size: 1rem;
-    letter-spacing: 0.08em;
-    text-transform: uppercase;
-    padding: 10px 20px;
-    border: none;
-    cursor: pointer;
-    transition: all 0.15s;
-  }
-
-  .btn-start {
-    background: var(--accent);
-    color: #000;
-    flex: 1;
-  }
-  .btn-start:hover { background: #33eaff; }
-  .btn-start:disabled { background: #1e2230; color: var(--muted); cursor: not-allowed; }
-
-  .btn-stop {
-    background: transparent;
-    color: var(--accent2);
-    border: 1px solid var(--accent2);
-    flex: 1;
-  }
-  .btn-stop:hover { background: rgba(255,61,113,0.1); }
-  .btn-stop:disabled { opacity: 0.3; cursor: not-allowed; }
-
-  .btn-check {
-    background: transparent;
-    color: var(--warn);
-    border: 1px solid var(--warn);
-    flex: 1;
-  }
-  .btn-check:hover { background: rgba(255,170,0,0.1); }
-  .btn-check:disabled { opacity: 0.3; cursor: not-allowed; }
-
-  /* Current Event Display */
-  .current-event-card {
-    width: 100%;
-    max-width: 720px;
-    border: 1px solid var(--border);
-    margin-bottom: 16px;
-    overflow: hidden;
-  }
-
-  .card-label {
-    font-family: 'Space Mono', monospace;
-    font-size: 0.6rem;
-    color: var(--muted);
-    text-transform: uppercase;
-    letter-spacing: 0.12em;
-    padding: 8px 16px;
-    background: rgba(255,255,255,0.02);
-    border-bottom: 1px solid var(--border);
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-  }
-
-  .live-dot {
-    display: inline-flex;
-    align-items: center;
-    gap: 6px;
-    color: var(--live);
-  }
-  .live-dot::before {
-    content: '';
-    width: 6px; height: 6px;
-    background: var(--live);
-    border-radius: 50%;
-    animation: blink 1s infinite;
-  }
-  @keyframes blink {
-    0%, 100% { opacity: 1; }
-    50% { opacity: 0.2; }
-  }
-
-  .event-display {
-    padding: 20px 16px;
-    display: flex;
-    align-items: center;
-    gap: 16px;
-  }
-
-  .event-number {
-    font-family: 'Space Mono', monospace;
-    font-size: 2rem;
-    font-weight: 700;
-    color: var(--muted);
-    min-width: 48px;
-    text-align: center;
-    line-height: 1;
-  }
-
-  .event-name {
-    font-family: 'Barlow Condensed', sans-serif;
-    font-weight: 700;
-    font-size: 2rem;
-    text-transform: uppercase;
-    letter-spacing: 0.02em;
-    line-height: 1.1;
-  }
-
-  .event-meta {
-    font-family: 'Space Mono', monospace;
-    font-size: 0.65rem;
-    color: var(--muted);
-    margin-top: 4px;
-  }
-
-  /* Progress / Events List */
-  .events-card {
-    width: 100%;
-    max-width: 720px;
-    border: 1px solid var(--border);
-    margin-bottom: 16px;
-  }
-
-  .events-list {
-    max-height: 340px;
-    overflow-y: auto;
-  }
-  .events-list::-webkit-scrollbar { width: 3px; }
-  .events-list::-webkit-scrollbar-track { background: transparent; }
-  .events-list::-webkit-scrollbar-thumb { background: var(--border); }
-
-  .event-row {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    padding: 10px 16px;
-    border-bottom: 1px solid rgba(30,34,48,0.6);
-    font-size: 0.95rem;
-    transition: background 0.15s;
-    position: relative;
-  }
-  .event-row:last-child { border-bottom: none; }
-
-  .event-row.is-live {
-    background: rgba(255,61,113,0.07);
-  }
-  .event-row.is-live .ev-name { color: var(--live); }
-
-  .event-row.is-target {
-    background: rgba(0,229,255,0.05);
-  }
-  .event-row.is-target .ev-name { color: var(--accent); }
-
-  .event-row.is-warn {
-    background: rgba(255,170,0,0.05);
-  }
-  .event-row.is-warn .ev-name { color: var(--warn); }
-
-  .event-row.is-done { opacity: 0.35; }
-
-  .ev-num {
-    font-family: 'Space Mono', monospace;
-    font-size: 0.65rem;
-    color: var(--muted);
-    min-width: 32px;
-    text-align: right;
-  }
-
-  .ev-badge {
-    font-family: 'Space Mono', monospace;
-    font-size: 0.55rem;
-    text-transform: uppercase;
-    letter-spacing: 0.1em;
-    padding: 2px 6px;
-    border-radius: 1px;
-    white-space: nowrap;
-  }
-  .badge-live { background: var(--live); color: #fff; }
-  .badge-target { background: var(--accent); color: #000; }
-  .badge-soon { background: var(--warn); color: #000; }
-  .badge-done { background: #1e2230; color: var(--muted); }
-
-  .ev-name { flex: 1; font-weight: 500; }
-  .ev-est { font-family: 'Space Mono', monospace; font-size: 0.6rem; color: var(--muted); }
-
-  /* Log */
-  .log-card {
-    width: 100%;
-    max-width: 720px;
-    border: 1px solid var(--border);
-  }
-
-  .log-entries {
-    font-family: 'Space Mono', monospace;
-    font-size: 0.65rem;
-    max-height: 200px;
-    overflow-y: auto;
-    padding: 12px 16px;
-    display: flex;
-    flex-direction: column;
-    gap: 4px;
-  }
-  .log-entries::-webkit-scrollbar { width: 3px; }
-  .log-entries::-webkit-scrollbar-thumb { background: var(--border); }
-
-  .log-entry { display: flex; gap: 10px; }
-  .log-time { color: var(--muted); min-width: 56px; }
-  .log-msg { color: var(--text); line-height: 1.4; }
-  .log-msg.info { color: var(--accent); }
-  .log-msg.warn { color: var(--warn); }
-  .log-msg.alert { color: var(--accent2); }
-  .log-msg.success { color: var(--green); }
-  .log-msg.error { color: var(--accent2); }
-
-  /* Alert banner */
-  .alert-banner {
-    width: 100%;
-    max-width: 720px;
-    background: var(--accent2);
-    color: #fff;
-    font-family: 'Barlow Condensed', sans-serif;
-    font-weight: 700;
-    font-size: 1.4rem;
-    text-transform: uppercase;
-    letter-spacing: 0.08em;
-    padding: 16px 24px;
-    margin-bottom: 16px;
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    animation: flash-bg 0.8s infinite alternate;
-  }
-
-  @keyframes flash-bg {
-    from { background: var(--accent2); }
-    to { background: #c41a4a; }
-  }
-
-  .alert-banner .alert-icon { font-size: 1.6rem; }
-  .alert-banner .alert-close {
-    margin-left: auto;
-    background: rgba(255,255,255,0.2);
-    color: #fff;
-    border: none;
-    font-size: 1rem;
-    padding: 4px 10px;
-    cursor: pointer;
-    font-family: 'Space Mono', monospace;
-  }
-
-  .spinner {
-    display: inline-block;
-    width: 10px; height: 10px;
-    border: 2px solid transparent;
-    border-top-color: var(--accent);
-    border-radius: 50%;
-    animation: spin 0.7s linear infinite;
-    margin-left: 6px;
-  }
-  @keyframes spin { to { transform: rotate(360deg); } }
-
-  .empty-state {
-    padding: 32px 16px;
-    text-align: center;
-    font-family: 'Space Mono', monospace;
-    font-size: 0.7rem;
-    color: var(--muted);
-    line-height: 1.8;
-  }
-
-  .progress-bar-wrap {
-    width: 100%;
-    height: 2px;
-    background: var(--border);
-    margin-top: 0;
-  }
-  .progress-bar-fill {
-    height: 100%;
-    background: var(--accent);
-    transition: width 1s linear;
-  }
-
-  .eta-row {
-    display: flex;
-    gap: 24px;
-    padding: 12px 16px;
-    background: rgba(0,229,255,0.03);
-    border-top: 1px solid var(--border);
-    flex-wrap: wrap;
-  }
-  .eta-item { display: flex; flex-direction: column; gap: 2px; }
-  .eta-label { font-family: 'Space Mono', monospace; font-size: 0.55rem; color: var(--muted); text-transform: uppercase; letter-spacing: 0.1em; }
-  .eta-value { font-family: 'Space Mono', monospace; font-size: 0.9rem; color: var(--accent); }
-
-  .next-check-bar {
-    height: 2px;
-    background: var(--border);
-    width: 100%;
-    margin-top: 8px;
-  }
-  .next-check-fill {
-    height: 100%;
-    background: var(--muted);
-    transition: width 1s linear;
-  }
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #0a0c10; color: #e0e4f0; min-height: 100vh; padding: 16px; }
+  h1 { font-size: 1.4rem; font-weight: 700; }
+  .subtitle { font-size: 0.8rem; color: #888; margin-top: 2px; }
+  header { margin-bottom: 16px; display: flex; justify-content: space-between; align-items: flex-start; }
+  .status-pill { font-size: 0.7rem; padding: 3px 10px; border-radius: 20px; font-weight: 600; text-transform: uppercase; }
+  .status-pill.idle { background: #1e2230; color: #888; }
+  .status-pill.running { background: #0d3320; color: #34d399; }
+  .status-pill.checking { background: #1e2a0d; color: #a3e635; }
+  .status-pill.alert { background: #3d1010; color: #f87171; }
+  .card { background: #111318; border: 1px solid #1e2230; border-radius: 10px; padding: 14px; margin-bottom: 12px; }
+  .card-label { font-size: 0.65rem; text-transform: uppercase; letter-spacing: 0.1em; color: #666; margin-bottom: 10px; }
+  label { font-size: 0.8rem; color: #aaa; display: block; margin-bottom: 4px; }
+  input { width: 100%; background: #0a0c10; border: 1px solid #2a2f45; border-radius: 6px; color: #e0e4f0; padding: 8px 10px; font-size: 0.85rem; margin-bottom: 10px; }
+  input:focus { outline: none; border-color: #4f6ef7; }
+  .row { display: flex; gap: 8px; }
+  .row input { flex: 1; }
+  .controls { display: flex; gap: 8px; margin-top: 4px; }
+  button { border: none; border-radius: 6px; padding: 10px 16px; font-size: 0.85rem; font-weight: 600; cursor: pointer; flex: 1; }
+  #btnStart { background: #4f6ef7; color: #fff; }
+  #btnStart:disabled { background: #2a2f45; color: #666; cursor: default; }
+  #btnCheck { background: #1e2230; color: #aaa; }
+  #btnCheck:disabled { opacity: 0.4; cursor: default; }
+  #btnStop { background: #3d1010; color: #f87171; }
+  #btnStop:disabled { opacity: 0.4; cursor: default; }
+  .live-event { font-size: 1.1rem; font-weight: 700; color: #34d399; min-height: 28px; }
+  .blink { animation: blink 1s step-start infinite; }
+  @keyframes blink { 50% { opacity: 0; } }
+  .eta { font-size: 0.8rem; color: #888; margin-top: 4px; }
+  .event-list { list-style: none; }
+  .event-list li { display: flex; align-items: center; gap: 8px; padding: 6px 0; border-bottom: 1px solid #1a1d28; font-size: 0.82rem; }
+  .event-list li:last-child { border-bottom: none; }
+  .badge { font-size: 0.65rem; padding: 2px 7px; border-radius: 10px; font-weight: 700; text-transform: uppercase; white-space: nowrap; }
+  .badge.live { background: #0d3320; color: #34d399; }
+  .badge.target { background: #2d1f00; color: #fbbf24; }
+  .badge.soon { background: #1e1a30; color: #a78bfa; }
+  .badge.done { background: #1a1a1a; color: #555; }
+  .badge.upcoming { background: #1e2230; color: #666; }
+  .log-entries { max-height: 160px; overflow-y: auto; }
+  .log-entry { display: flex; gap: 8px; padding: 4px 0; border-bottom: 1px solid #15171f; font-size: 0.75rem; }
+  .log-time { color: #555; white-space: nowrap; }
+  .log-msg { color: #aaa; }
+  .log-msg.err { color: #f87171; }
+  .log-msg.ok { color: #34d399; }
+  .log-msg.warn { color: #fbbf24; }
+  .alert-banner { display: none; background: #3d1010; border: 1px solid #7f1d1d; border-radius: 10px; padding: 14px; margin-bottom: 12px; }
+  .alert-banner.visible { display: block; }
+  .alert-title { font-size: 1rem; font-weight: 700; color: #f87171; }
+  .alert-body { font-size: 0.8rem; color: #fca5a5; margin-top: 4px; }
+  #btnDismiss { background: #7f1d1d; color: #fca5a5; margin-top: 10px; width: auto; padding: 6px 14px; }
+  .progress-bar { height: 4px; background: #1e2230; border-radius: 2px; margin-top: 8px; }
+  .progress-fill { height: 100%; background: #4f6ef7; border-radius: 2px; transition: width 1s linear; }
 </style>
 </head>
 <body>
 
 <header>
-  <div class="header-top">
+  <div>
     <h1>Meet Monitor</h1>
-    <span class="status-pill idle" id="statusPill">Idle</span>
+    <div class="subtitle">AthleticLIVE · Girls 4×400 Alert</div>
   </div>
-  <div class="subtitle">AthleticLIVE · Girls 4×400 Alert System</div>
+  <span class="status-pill idle" id="statusPill">Idle</span>
 </header>
 
-<div id="alertBanner" style="display:none" class="alert-banner">
-  <span class="alert-icon">🚨</span>
-  <span id="alertText">ALERT</span>
-  <button class="alert-close" id="btnDismiss">✕ Dismiss</button>
+<div class="alert-banner" id="alertBanner">
+  <div class="alert-title">⚠️ Target Event Approaching!</div>
+  <div class="alert-body" id="alertBody"></div>
+  <button id="btnDismiss">Dismiss</button>
 </div>
 
-<!-- Config -->
-<div class="main-card">
-  <div class="config-row">
-    <div class="field-group input-full">
-      <label>AthleticLIVE Meet URL</label>
-      <input id="meetUrl" type="text" value="https://live.finallaptiminggroup.com/meets/60830" placeholder="https://live.finallaptiminggroup.com/meets/..." />
+<div class="card">
+  <div class="card-label">Configuration</div>
+  <label>Meet URL</label>
+  <input id="meetUrl" type="url" value="https://live.finallaptiminggroup.com/meets/60830">
+  <label>Target Event</label>
+  <input id="targetEvent" type="text" value="Girls 4x400">
+  <label>Anthropic API Key</label>
+  <input id="apiKey" type="password" placeholder="sk-ant-...">
+  <div class="row">
+    <div style="flex:1">
+      <label>Alert Before (# events)</label>
+      <input id="alertBefore" type="number" value="3" min="1" max="10">
     </div>
-    <div class="field-group">
-      <label>Target Event (to monitor for)</label>
-      <input id="targetEvent" type="text" value="Girls 4x400" />
-    </div>
-    <div class="field-group">
-      <label>Alert me this many events before</label>
-      <input id="alertOffset" type="number" value="3" min="1" max="10" />
-    </div>
-    <div class="field-group">
-      <label>Check every (minutes)</label>
-      <input id="checkInterval" type="number" value="2" min="1" max="10" />
-    </div>
-    <div class="field-group">
-      <label>Anthropic API Key</label>
-      <input id="apiKey" type="password" placeholder="sk-ant-..." />
+    <div style="flex:1">
+      <label>Check Every (minutes)</label>
+      <input id="checkInterval" type="number" value="2" min="1" max="30">
     </div>
   </div>
   <div class="controls">
-    <button class="btn-start" id="btnStart" id="btnStartInner">▶ Start Monitoring</button>
-    <button class="btn-check" id="btnCheck"  disabled>↻ Check Now</button>
-    <button class="btn-stop" id="btnStop"  disabled>■ Stop</button>
+    <button id="btnStart">▶ Start</button>
+    <button id="btnCheck" disabled>↻ Check Now</button>
+    <button id="btnStop" disabled>■ Stop</button>
   </div>
-  <div class="next-check-bar" style="margin-top:12px">
-    <div class="next-check-fill" id="nextCheckFill" style="width:0%"></div>
-  </div>
-  <div style="font-family:'Space Mono',monospace;font-size:0.55rem;color:var(--muted);margin-top:4px;text-align:right" id="nextCheckLabel"></div>
+  <div class="progress-bar"><div class="progress-fill" id="progressFill" style="width:0%"></div></div>
+  <div style="font-size:0.72rem;color:#555;margin-top:4px;" id="nextCheckLabel"></div>
 </div>
 
-<!-- Current Event -->
-<div class="current-event-card">
-  <div class="card-label">
-    <span>Current Live Event</span>
-    <span class="live-dot" id="liveDotLabel" style="display:none">Live</span>
-  </div>
-  <div class="event-display" id="currentEventDisplay">
-    <div class="empty-state">Not yet monitoring.<br>Enter your API key and press Start.</div>
-  </div>
-  <div class="eta-row" id="etaRow" style="display:none">
-    <div class="eta-item">
-      <span class="eta-label">Events Until Target</span>
-      <span class="eta-value" id="etaEvents">—</span>
-    </div>
-    <div class="eta-item">
-      <span class="eta-label">Est. Time Until Target</span>
-      <span class="eta-value" id="etaTime">—</span>
-    </div>
-    <div class="eta-item">
-      <span class="eta-label">Avg Time Per Event</span>
-      <span class="eta-value" id="etaAvg">—</span>
-    </div>
-    <div class="eta-item">
-      <span class="eta-label">Est. Start Time</span>
-      <span class="eta-value" id="etaStart">—</span>
-    </div>
-  </div>
+<div class="card">
+  <div class="card-label">Current Live Event</div>
+  <div class="live-event" id="liveEventDisplay">—</div>
+  <div class="eta" id="etaDisplay"></div>
 </div>
 
-<!-- Events list -->
-<div class="events-card">
-  <div class="card-label">
-    <span>Event Schedule</span>
-    <span id="eventsCountLabel" style="color:var(--muted)">—</span>
-  </div>
-  <div class="events-list" id="eventsList">
-    <div class="empty-state">Event schedule will appear after first check.</div>
-  </div>
+<div class="card">
+  <div class="card-label">Event Schedule</div>
+  <ul class="event-list" id="eventList"><li style="color:#555;font-size:0.8rem;">No data yet</li></ul>
 </div>
 
-<!-- Log -->
-<div class="log-card">
+<div class="card">
   <div class="card-label">Activity Log</div>
   <div class="log-entries" id="logEntries">
     <div class="log-entry"><span class="log-time">--:--:--</span><span class="log-msg">Ready. Configure and press Start.</span></div>
@@ -559,7 +122,7 @@
 
 <script>
 let monitorInterval = null;
-let nextCheckTimer = null;
+let countdownInterval = null;
 let isChecking = false;
 let state = {
   events: [],
@@ -567,163 +130,123 @@ let state = {
   targetIndex: -1,
   alertFired: false,
   lastCheckTime: null,
-  avgEventDuration: null, // minutes
-  eventTimestamps: [], // {index, time}
 };
 
 function log(msg, type = '') {
   const now = new Date();
   const t = now.toTimeString().slice(0,8);
-  const el = document.createElement('div');
-  el.className = 'log-entry';
-  el.innerHTML = `<span class="log-time">${t}</span><span class="log-msg ${type}">${msg}</span>`;
-  const container = document.getElementById('logEntries');
-  container.appendChild(el);
-  container.scrollTop = container.scrollHeight;
+  const el = document.getElementById('logEntries');
+  const row = document.createElement('div');
+  row.className = 'log-entry';
+  row.innerHTML = `<span class="log-time">${t}</span><span class="log-msg ${type}">${msg}</span>`;
+  el.insertBefore(row, el.firstChild);
+  if (el.children.length > 100) el.removeChild(el.lastChild);
 }
 
 function setStatus(s) {
   const pill = document.getElementById('statusPill');
   pill.className = 'status-pill ' + s;
-  const labels = { idle: 'Idle', monitoring: 'Monitoring', alerted: 'Alert!' };
-  pill.textContent = labels[s] || s;
+  pill.textContent = s.charAt(0).toUpperCase() + s.slice(1);
 }
 
-function dismissAlert() {
-  document.getElementById('alertBanner').style.display = 'none';
-}
-
-function showAlert(msg) {
-  const el = document.getElementById('alertBanner');
-  document.getElementById('alertText').textContent = msg;
-  el.style.display = 'flex';
-  setStatus('alerted');
-  // Try browser notification
-  if ('Notification' in window && Notification.permission === 'granted') {
-    new Notification('Meet Monitor Alert', { body: msg, icon: '' });
-  }
-  log('🚨 ' + msg, 'alert');
-}
-
-async function fetchMeetData(url, apiKey) {
-  // Extract meet ID from URL e.g. https://live.finallaptiminggroup.com/meets/60830
-  const meetId = url.match(/meets\/([0-9]+)/)?.[1];
-  if (!meetId) throw new Error('Could not extract meet ID from URL: ' + url);
-
-  // Try known AthleticLIVE JSON API endpoints via a CORS proxy
-  const proxyBase = 'https://corsproxy.io/?';
-  const endpoints = [
-    `https://live.finallaptiminggroup.com/api/meets/${meetId}/events`,
-    `https://live.finallaptiminggroup.com/api/meets/${meetId}`,
-    `https://live.finallaptiminggroup.com/meets/${meetId}/events.json`,
-    `https://athletic.net/api/v1/meet/${meetId}/events`,
-  ];
-
-  let rawJson = null;
-  let usedUrl = null;
-
-  for (const ep of endpoints) {
-    try {
-      log(`Trying: ${ep}`, '');
-      const resp = await fetch(proxyBase + encodeURIComponent(ep));
-      log(`  → HTTP ${resp.status}`, '');
-      if (resp.ok) {
-        const text = await resp.text();
-        if (text && text.trim().startsWith('{') || text.trim().startsWith('[')) {
-          rawJson = text;
-          usedUrl = ep;
-          break;
-        }
-      }
-    } catch(e) {
-      log(`  → failed: ${e.message}`, '');
-    }
+function updateUI() {
+  const liveEl = document.getElementById('liveEventDisplay');
+  const etaEl = document.getElementById('etaDisplay');
+  if (state.currentLiveIndex >= 0 && state.events[state.currentLiveIndex]) {
+    const ev = state.events[state.currentLiveIndex];
+    liveEl.innerHTML = `<span class="blink">●</span> ${ev.name}`;
+  } else {
+    liveEl.textContent = '—';
   }
 
-  // If direct endpoints failed, fall back to scraping the main page HTML for embedded JSON
-  if (!rawJson) {
-    log('Direct endpoints failed. Scraping main page for embedded data...', 'warn');
-    const resp = await fetch(proxyBase + encodeURIComponent(url));
-    log(`  Main page HTTP ${resp.status}`, '');
-    if (!resp.ok) throw new Error(`Could not fetch meet page: HTTP ${resp.status}`);
-    const html = await resp.text();
-    log(`  Got ${html.length} chars of HTML`, '');
+  const ul = document.getElementById('eventList');
+  if (!state.events.length) { ul.innerHTML = '<li style="color:#555;font-size:0.8rem;">No data yet</li>'; return; }
 
-    // Look for embedded JSON data in script tags (common in SPA apps)
-    const patterns = [
-      /window\.__INITIAL_STATE__\s*=\s*({[\s\S]+?});\s*<\/script>/,
-      /window\.__data\s*=\s*({[\s\S]+?});\s*<\/script>/,
-      /"events"\s*:\s*(\[[\s\S]+?\])/,
-    ];
+  ul.innerHTML = '';
+  state.events.forEach((ev, i) => {
+    const li = document.createElement('li');
+    let badgeClass = 'upcoming';
+    let badgeText = 'Up';
+    if (i === state.currentLiveIndex) { badgeClass = 'live'; badgeText = 'Live'; }
+    else if (i === state.targetIndex) { badgeClass = 'target'; badgeText = 'TARGET'; }
+    else if (i < state.currentLiveIndex) { badgeClass = 'done'; badgeText = 'Done'; }
+    else if (state.currentLiveIndex >= 0 && i > state.currentLiveIndex && i <= state.currentLiveIndex + 4) { badgeClass = 'soon'; badgeText = 'Soon'; }
 
-    for (const pat of patterns) {
-      const m = html.match(pat);
-      if (m) { rawJson = m[1]; log('Found embedded JSON!', 'success'); break; }
-    }
-
-    // If still nothing, send HTML to Claude to parse
-    if (!rawJson) {
-      log('No embedded JSON found. Asking Claude to parse HTML...', 'warn');
-      // Send a chunk of the HTML to Claude for parsing
-      const snippet = html.slice(0, 8000);
-      return await parseWithClaude(snippet, url, apiKey);
-    }
-  }
-
-  // Parse the JSON we found
-  try {
-    const parsed = JSON.parse(rawJson);
-    return normalizeEventData(parsed);
-  } catch(e) {
-    log(`JSON parse error: ${e.message}, falling back to Claude`, 'warn');
-    return await parseWithClaude(rawJson.slice(0, 8000), url, apiKey);
-  }
-}
-
-function normalizeEventData(parsed) {
-  // Handle various shapes of event data
-  let events = [];
-  let liveEvent = null;
-  let liveIndex = -1;
-
-  const raw = Array.isArray(parsed) ? parsed : (parsed.events || parsed.data || parsed.results || []);
-
-  events = raw.map((ev, i) => {
-    const name = ev.name || ev.event_name || ev.title || ev.description || `Event ${i+1}`;
-    const num = ev.number || ev.event_number || ev.order || (i + 1);
-    let status = 'upcoming';
-    if (ev.status) {
-      const s = ev.status.toString().toLowerCase();
-      if (s.includes('live') || s.includes('active') || s.includes('running') || s === '1') status = 'live';
-      else if (s.includes('done') || s.includes('complet') || s.includes('finish') || s === '2') status = 'done';
-    }
-    if (ev.is_live || ev.live || ev.current) status = 'live';
-    if (ev.is_complete || ev.completed || ev.finished) status = 'done';
-    if (status === 'live') { liveEvent = name; liveIndex = i; }
-    return { number: num, name, status };
+    li.innerHTML = `<span class="badge ${badgeClass}">${badgeText}</span><span>${ev.name}</span>`;
+    ul.appendChild(li);
   });
 
-  return { events, liveEvent, liveIndex };
+  // ETA
+  if (state.targetIndex > state.currentLiveIndex && state.currentLiveIndex >= 0) {
+    const eventsAway = state.targetIndex - state.currentLiveIndex;
+    etaEl.textContent = `Target is ~${eventsAway} event${eventsAway !== 1 ? 's' : ''} away`;
+  } else if (state.targetIndex === state.currentLiveIndex && state.currentLiveIndex >= 0) {
+    etaEl.textContent = '🎯 Target event is LIVE NOW!';
+  } else {
+    etaEl.textContent = '';
+  }
 }
 
-async function parseWithClaude(htmlSnippet, url, apiKey) {
+function checkAlert() {
+  if (state.alertFired) return;
+  if (state.targetIndex < 0 || state.currentLiveIndex < 0) return;
+  const alertBefore = parseInt(document.getElementById('alertBefore').value) || 3;
+  const eventsAway = state.targetIndex - state.currentLiveIndex;
+  if (eventsAway >= 0 && eventsAway <= alertBefore) {
+    state.alertFired = true;
+    const banner = document.getElementById('alertBanner');
+    banner.classList.add('visible');
+    document.getElementById('alertBody').textContent =
+      eventsAway === 0
+        ? 'Your target event is LIVE RIGHT NOW!'
+        : `Your target event is ${eventsAway} event${eventsAway !== 1 ? 's' : ''} away. Get ready!`;
+    setStatus('alert');
+    try { new Notification('Meet Monitor', { body: document.getElementById('alertBody').textContent }); } catch(e) {}
+    log(`ALERT: Target event ${eventsAway === 0 ? 'is LIVE' : 'is ' + eventsAway + ' events away'}!`, 'err');
+  }
+}
+
+async function fetchMeetData() {
+  const meetUrl = document.getElementById('meetUrl').value.trim();
+  const apiKey = document.getElementById('apiKey').value.trim();
   const target = document.getElementById('targetEvent').value.trim();
-  const prompt = `Here is HTML/data from a track & field meet results page (${url}).
-Parse it and extract the event schedule.
 
-DATA:
-${htmlSnippet}
+  if (!apiKey) throw new Error('No API key entered');
 
-Return ONLY this JSON, no explanation:
-\`\`\`json
-{"events":[{"number":1,"name":"Boys 100m","status":"done"}],"liveEvent":"Girls 100m","liveIndex":1}
-\`\`\`
+  const meetId = meetUrl.match(/meets\/([0-9]+)/)?.[1];
+  if (!meetId) throw new Error('Could not extract meet ID from URL');
 
-Rules:
-- status: "done" = finished, "live" = happening now (look for "Live" badge/indicator), "upcoming" = not yet
-- liveIndex = 0-based index in events array of the live event (-1 if none)
-- Include "${target}" if it appears
-- If no events found: {"events":[],"liveEvent":null,"liveIndex":-1}`;
+  log(`Fetching meet data (ID: ${meetId})...`);
+
+  // Try direct API endpoints first
+  const apiEndpoints = [
+    `https://liveresults.trxctiming.com/api/meets/${meetId}/events`,
+    `https://live.finallaptiminggroup.com/api/meets/${meetId}/events`,
+    `https://live.finallaptiminggroup.com/api/meets/${meetId}`,
+  ];
+
+  for (const endpoint of apiEndpoints) {
+    try {
+      log(`Trying API: ${endpoint.split('/').slice(-3).join('/')}`);
+      const r = await fetch(`https://corsproxy.io/?${encodeURIComponent(endpoint)}`);
+      if (r.ok) {
+        const json = await r.json();
+        log('Direct API success!', 'ok');
+        return parseDirectApi(json, target);
+      }
+    } catch(e) { /* try next */ }
+  }
+
+  // Fall back to fetching HTML and asking Claude
+  log('Direct API failed, fetching page HTML...');
+  const proxyUrl = `https://corsproxy.io/?${encodeURIComponent(meetUrl)}`;
+  const htmlResp = await fetch(proxyUrl);
+  if (!htmlResp.ok) throw new Error(`CORS proxy failed: ${htmlResp.status}`);
+  const html = await htmlResp.text();
+  log(`Got HTML (${Math.round(html.length/1024)}KB), sending to Claude...`);
+
+  // Extract relevant portion
+  const snippet = html.slice(0, 8000);
 
   const resp = await fetch('https://api.anthropic.com/v1/messages', {
     method: 'POST',
@@ -731,957 +254,164 @@ Rules:
       'Content-Type': 'application/json',
       'x-api-key': apiKey,
       'anthropic-version': '2023-06-01',
-      'anthropic-dangerous-direct-browser-access': 'true'
+      'anthropic-dangerous-direct-browser-access': 'true',
     },
     body: JSON.stringify({
       model: 'claude-haiku-4-5-20251001',
-      max_tokens: 2000,
-      messages: [{ role: 'user', content: prompt }]
+      max_tokens: 1000,
+      messages: [{
+        role: 'user',
+        content: `This is HTML from a track meet live results page. Extract the event schedule.
+Find: 1) which event is currently LIVE/active, 2) the ordered list of all events.
+Target event to find: "${target}"
+
+HTML:
+${snippet}
+
+Reply ONLY with JSON, no markdown:
+{"currentLiveEvent":"<name or null>","events":[{"name":"<event name>","isLive":<true/false>}]}`
+      }]
     })
   });
 
+  log(`Claude: HTTP ${resp.status}`);
+  if (!resp.ok) {
+    const err = await resp.json().catch(() => ({}));
+    throw new Error(`Claude API ${resp.status}: ${err.error?.message || 'unknown'}`);
+  }
+
   const data = await resp.json();
-  log(`Claude parse: HTTP ${resp.status} | stop: ${data.stop_reason}`, '');
-  if (!resp.ok) throw new Error(`Claude API ${resp.status}: ${data.error?.message}`);
+  const text = (data.content || []).filter(b => b.type === 'text').map(b => b.text).join('');
+  log(`Claude replied: ${text.slice(0, 100)}`);
 
-  const text = (data.content||[]).filter(b=>b.type==='text').map(b=>b.text).join('\n');
-  log(`Claude response preview: ${text.slice(0,150)}`, '');
-
-  const codeBlock = text.match(/```json\s*([\s\S]*?)```/);
-  const jsonStr = codeBlock ? codeBlock[1].trim() : text.match(/\{[\s\S]*\}/)?.[0];
-  if (!jsonStr) throw new Error('Claude could not parse the page data');
-  return JSON.parse(jsonStr);
-}tyle>
-  @import url('https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Barlow+Condensed:wght@300;500;700;900&display=swap');
-
-  :root {
-    --bg: #0a0c10;
-    --surface: #111318;
-    --border: #1e2230;
-    --accent: #00e5ff;
-    --accent2: #ff3d71;
-    --warn: #ffaa00;
-    --green: #00e676;
-    --text: #e0e6f0;
-    --muted: #5a6480;
-    --live: #ff3d71;
-  }
-
-  * { box-sizing: border-box; margin: 0; padding: 0; }
-
-  body {
-    background: var(--bg);
-    color: var(--text);
-    font-family: 'Barlow Condensed', sans-serif;
-    min-height: 100vh;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    padding: 24px 16px 60px;
-  }
-
-  /* Scanline overlay */
-  body::before {
-    content: '';
-    position: fixed;
-    inset: 0;
-    background: repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0,229,255,0.015) 2px, rgba(0,229,255,0.015) 4px);
-    pointer-events: none;
-    z-index: 999;
-  }
-
-  header {
-    width: 100%;
-    max-width: 720px;
-    margin-bottom: 28px;
-    border-bottom: 1px solid var(--border);
-    padding-bottom: 20px;
-    display: flex;
-    flex-direction: column;
-    gap: 6px;
-  }
-
-  .header-top {
-    display: flex;
-    align-items: baseline;
-    justify-content: space-between;
-    gap: 12px;
-  }
-
-  h1 {
-    font-family: 'Barlow Condensed', sans-serif;
-    font-weight: 900;
-    font-size: 2.4rem;
-    letter-spacing: 0.04em;
-    text-transform: uppercase;
-    color: var(--accent);
-    text-shadow: 0 0 20px rgba(0,229,255,0.4);
-    line-height: 1;
-  }
-
-  .subtitle {
-    font-family: 'Space Mono', monospace;
-    font-size: 0.65rem;
-    color: var(--muted);
-    letter-spacing: 0.08em;
-    text-transform: uppercase;
-  }
-
-  .status-pill {
-    font-family: 'Space Mono', monospace;
-    font-size: 0.65rem;
-    padding: 4px 10px;
-    border-radius: 2px;
-    border: 1px solid;
-    text-transform: uppercase;
-    letter-spacing: 0.1em;
-    white-space: nowrap;
-  }
-  .status-pill.idle { color: var(--muted); border-color: var(--muted); }
-  .status-pill.monitoring { color: var(--accent); border-color: var(--accent); animation: pulse-border 2s infinite; }
-  .status-pill.alerted { color: var(--accent2); border-color: var(--accent2); animation: pulse-border-red 1s infinite; }
-
-  @keyframes pulse-border {
-    0%, 100% { box-shadow: 0 0 0 0 rgba(0,229,255,0.3); }
-    50% { box-shadow: 0 0 0 4px rgba(0,229,255,0.1); }
-  }
-  @keyframes pulse-border-red {
-    0%, 100% { box-shadow: 0 0 0 0 rgba(255,61,113,0.4); }
-    50% { box-shadow: 0 0 0 6px rgba(255,61,113,0.1); }
-  }
-
-  .main-card {
-    width: 100%;
-    max-width: 720px;
-    background: var(--surface);
-    border: 1px solid var(--border);
-    padding: 24px;
-    margin-bottom: 16px;
-  }
-
-  .config-row {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 12px;
-    margin-bottom: 16px;
-  }
-
-  .field-group {
-    display: flex;
-    flex-direction: column;
-    gap: 6px;
-  }
-
-  label {
-    font-family: 'Space Mono', monospace;
-    font-size: 0.6rem;
-    color: var(--muted);
-    text-transform: uppercase;
-    letter-spacing: 0.1em;
-  }
-
-  input {
-    background: #0d0f14;
-    border: 1px solid var(--border);
-    color: var(--text);
-    font-family: 'Space Mono', monospace;
-    font-size: 0.8rem;
-    padding: 10px 12px;
-    outline: none;
-    width: 100%;
-    transition: border-color 0.2s;
-  }
-  input:focus { border-color: var(--accent); }
-
-  .input-full { grid-column: 1 / -1; }
-
-  .controls {
-    display: flex;
-    gap: 10px;
-    margin-top: 4px;
-  }
-
-  button {
-    font-family: 'Barlow Condensed', sans-serif;
-    font-weight: 700;
-    font-size: 1rem;
-    letter-spacing: 0.08em;
-    text-transform: uppercase;
-    padding: 10px 20px;
-    border: none;
-    cursor: pointer;
-    transition: all 0.15s;
-  }
-
-  .btn-start {
-    background: var(--accent);
-    color: #000;
-    flex: 1;
-  }
-  .btn-start:hover { background: #33eaff; }
-  .btn-start:disabled { background: #1e2230; color: var(--muted); cursor: not-allowed; }
-
-  .btn-stop {
-    background: transparent;
-    color: var(--accent2);
-    border: 1px solid var(--accent2);
-    flex: 1;
-  }
-  .btn-stop:hover { background: rgba(255,61,113,0.1); }
-  .btn-stop:disabled { opacity: 0.3; cursor: not-allowed; }
-
-  .btn-check {
-    background: transparent;
-    color: var(--warn);
-    border: 1px solid var(--warn);
-    flex: 1;
-  }
-  .btn-check:hover { background: rgba(255,170,0,0.1); }
-  .btn-check:disabled { opacity: 0.3; cursor: not-allowed; }
-
-  /* Current Event Display */
-  .current-event-card {
-    width: 100%;
-    max-width: 720px;
-    border: 1px solid var(--border);
-    margin-bottom: 16px;
-    overflow: hidden;
-  }
-
-  .card-label {
-    font-family: 'Space Mono', monospace;
-    font-size: 0.6rem;
-    color: var(--muted);
-    text-transform: uppercase;
-    letter-spacing: 0.12em;
-    padding: 8px 16px;
-    background: rgba(255,255,255,0.02);
-    border-bottom: 1px solid var(--border);
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-  }
-
-  .live-dot {
-    display: inline-flex;
-    align-items: center;
-    gap: 6px;
-    color: var(--live);
-  }
-  .live-dot::before {
-    content: '';
-    width: 6px; height: 6px;
-    background: var(--live);
-    border-radius: 50%;
-    animation: blink 1s infinite;
-  }
-  @keyframes blink {
-    0%, 100% { opacity: 1; }
-    50% { opacity: 0.2; }
-  }
-
-  .event-display {
-    padding: 20px 16px;
-    display: flex;
-    align-items: center;
-    gap: 16px;
-  }
-
-  .event-number {
-    font-family: 'Space Mono', monospace;
-    font-size: 2rem;
-    font-weight: 700;
-    color: var(--muted);
-    min-width: 48px;
-    text-align: center;
-    line-height: 1;
-  }
-
-  .event-name {
-    font-family: 'Barlow Condensed', sans-serif;
-    font-weight: 700;
-    font-size: 2rem;
-    text-transform: uppercase;
-    letter-spacing: 0.02em;
-    line-height: 1.1;
-  }
-
-  .event-meta {
-    font-family: 'Space Mono', monospace;
-    font-size: 0.65rem;
-    color: var(--muted);
-    margin-top: 4px;
-  }
-
-  /* Progress / Events List */
-  .events-card {
-    width: 100%;
-    max-width: 720px;
-    border: 1px solid var(--border);
-    margin-bottom: 16px;
-  }
-
-  .events-list {
-    max-height: 340px;
-    overflow-y: auto;
-  }
-  .events-list::-webkit-scrollbar { width: 3px; }
-  .events-list::-webkit-scrollbar-track { background: transparent; }
-  .events-list::-webkit-scrollbar-thumb { background: var(--border); }
-
-  .event-row {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    padding: 10px 16px;
-    border-bottom: 1px solid rgba(30,34,48,0.6);
-    font-size: 0.95rem;
-    transition: background 0.15s;
-    position: relative;
-  }
-  .event-row:last-child { border-bottom: none; }
-
-  .event-row.is-live {
-    background: rgba(255,61,113,0.07);
-  }
-  .event-row.is-live .ev-name { color: var(--live); }
-
-  .event-row.is-target {
-    background: rgba(0,229,255,0.05);
-  }
-  .event-row.is-target .ev-name { color: var(--accent); }
-
-  .event-row.is-warn {
-    background: rgba(255,170,0,0.05);
-  }
-  .event-row.is-warn .ev-name { color: var(--warn); }
-
-  .event-row.is-done { opacity: 0.35; }
-
-  .ev-num {
-    font-family: 'Space Mono', monospace;
-    font-size: 0.65rem;
-    color: var(--muted);
-    min-width: 32px;
-    text-align: right;
-  }
-
-  .ev-badge {
-    font-family: 'Space Mono', monospace;
-    font-size: 0.55rem;
-    text-transform: uppercase;
-    letter-spacing: 0.1em;
-    padding: 2px 6px;
-    border-radius: 1px;
-    white-space: nowrap;
-  }
-  .badge-live { background: var(--live); color: #fff; }
-  .badge-target { background: var(--accent); color: #000; }
-  .badge-soon { background: var(--warn); color: #000; }
-  .badge-done { background: #1e2230; color: var(--muted); }
-
-  .ev-name { flex: 1; font-weight: 500; }
-  .ev-est { font-family: 'Space Mono', monospace; font-size: 0.6rem; color: var(--muted); }
-
-  /* Log */
-  .log-card {
-    width: 100%;
-    max-width: 720px;
-    border: 1px solid var(--border);
-  }
-
-  .log-entries {
-    font-family: 'Space Mono', monospace;
-    font-size: 0.65rem;
-    max-height: 200px;
-    overflow-y: auto;
-    padding: 12px 16px;
-    display: flex;
-    flex-direction: column;
-    gap: 4px;
-  }
-  .log-entries::-webkit-scrollbar { width: 3px; }
-  .log-entries::-webkit-scrollbar-thumb { background: var(--border); }
-
-  .log-entry { display: flex; gap: 10px; }
-  .log-time { color: var(--muted); min-width: 56px; }
-  .log-msg { color: var(--text); line-height: 1.4; }
-  .log-msg.info { color: var(--accent); }
-  .log-msg.warn { color: var(--warn); }
-  .log-msg.alert { color: var(--accent2); }
-  .log-msg.success { color: var(--green); }
-  .log-msg.error { color: var(--accent2); }
-
-  /* Alert banner */
-  .alert-banner {
-    width: 100%;
-    max-width: 720px;
-    background: var(--accent2);
-    color: #fff;
-    font-family: 'Barlow Condensed', sans-serif;
-    font-weight: 700;
-    font-size: 1.4rem;
-    text-transform: uppercase;
-    letter-spacing: 0.08em;
-    padding: 16px 24px;
-    margin-bottom: 16px;
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    animation: flash-bg 0.8s infinite alternate;
-  }
-
-  @keyframes flash-bg {
-    from { background: var(--accent2); }
-    to { background: #c41a4a; }
-  }
-
-  .alert-banner .alert-icon { font-size: 1.6rem; }
-  .alert-banner .alert-close {
-    margin-left: auto;
-    background: rgba(255,255,255,0.2);
-    color: #fff;
-    border: none;
-    font-size: 1rem;
-    padding: 4px 10px;
-    cursor: pointer;
-    font-family: 'Space Mono', monospace;
-  }
-
-  .spinner {
-    display: inline-block;
-    width: 10px; height: 10px;
-    border: 2px solid transparent;
-    border-top-color: var(--accent);
-    border-radius: 50%;
-    animation: spin 0.7s linear infinite;
-    margin-left: 6px;
-  }
-  @keyframes spin { to { transform: rotate(360deg); } }
-
-  .empty-state {
-    padding: 32px 16px;
-    text-align: center;
-    font-family: 'Space Mono', monospace;
-    font-size: 0.7rem;
-    color: var(--muted);
-    line-height: 1.8;
-  }
-
-  .progress-bar-wrap {
-    width: 100%;
-    height: 2px;
-    background: var(--border);
-    margin-top: 0;
-  }
-  .progress-bar-fill {
-    height: 100%;
-    background: var(--accent);
-    transition: width 1s linear;
-  }
-
-  .eta-row {
-    display: flex;
-    gap: 24px;
-    padding: 12px 16px;
-    background: rgba(0,229,255,0.03);
-    border-top: 1px solid var(--border);
-    flex-wrap: wrap;
-  }
-  .eta-item { display: flex; flex-direction: column; gap: 2px; }
-  .eta-label { font-family: 'Space Mono', monospace; font-size: 0.55rem; color: var(--muted); text-transform: uppercase; letter-spacing: 0.1em; }
-  .eta-value { font-family: 'Space Mono', monospace; font-size: 0.9rem; color: var(--accent); }
-
-  .next-check-bar {
-    height: 2px;
-    background: var(--border);
-    width: 100%;
-    margin-top: 8px;
-  }
-  .next-check-fill {
-    height: 100%;
-    background: var(--muted);
-    transition: width 1s linear;
-  }
-</style>
-</head>
-<body>
-
-<header>
-  <div class="header-top">
-    <h1>Meet Monitor</h1>
-    <span class="status-pill idle" id="statusPill">Idle</span>
-  </div>
-  <div class="subtitle">AthleticLIVE · Girls 4×400 Alert System</div>
-</header>
-
-<div id="alertBanner" style="display:none" class="alert-banner">
-  <span class="alert-icon">🚨</span>
-  <span id="alertText">ALERT</span>
-  <button class="alert-close" id="btnDismiss">✕ Dismiss</button>
-</div>
-
-<!-- Config -->
-<div class="main-card">
-  <div class="config-row">
-    <div class="field-group input-full">
-      <label>AthleticLIVE Meet URL</label>
-      <input id="meetUrl" type="text" value="https://live.finallaptiminggroup.com/meets/60830" placeholder="https://live.finallaptiminggroup.com/meets/..." />
-    </div>
-    <div class="field-group">
-      <label>Target Event (to monitor for)</label>
-      <input id="targetEvent" type="text" value="Girls 4x400" />
-    </div>
-    <div class="field-group">
-      <label>Alert me this many events before</label>
-      <input id="alertOffset" type="number" value="3" min="1" max="10" />
-    </div>
-    <div class="field-group">
-      <label>Check every (minutes)</label>
-      <input id="checkInterval" type="number" value="2" min="1" max="10" />
-    </div>
-    <div class="field-group">
-      <label>Anthropic API Key</label>
-      <input id="apiKey" type="password" placeholder="sk-ant-..." />
-    </div>
-  </div>
-  <div class="controls">
-    <button class="btn-start" id="btnStart" id="btnStartInner">▶ Start Monitoring</button>
-    <button class="btn-check" id="btnCheck"  disabled>↻ Check Now</button>
-    <button class="btn-stop" id="btnStop"  disabled>■ Stop</button>
-  </div>
-  <div class="next-check-bar" style="margin-top:12px">
-    <div class="next-check-fill" id="nextCheckFill" style="width:0%"></div>
-  </div>
-  <div style="font-family:'Space Mono',monospace;font-size:0.55rem;color:var(--muted);margin-top:4px;text-align:right" id="nextCheckLabel"></div>
-</div>
-
-<!-- Current Event -->
-<div class="current-event-card">
-  <div class="card-label">
-    <span>Current Live Event</span>
-    <span class="live-dot" id="liveDotLabel" style="display:none">Live</span>
-  </div>
-  <div class="event-display" id="currentEventDisplay">
-    <div class="empty-state">Not yet monitoring.<br>Enter your API key and press Start.</div>
-  </div>
-  <div class="eta-row" id="etaRow" style="display:none">
-    <div class="eta-item">
-      <span class="eta-label">Events Until Target</span>
-      <span class="eta-value" id="etaEvents">—</span>
-    </div>
-    <div class="eta-item">
-      <span class="eta-label">Est. Time Until Target</span>
-      <span class="eta-value" id="etaTime">—</span>
-    </div>
-    <div class="eta-item">
-      <span class="eta-label">Avg Time Per Event</span>
-      <span class="eta-value" id="etaAvg">—</span>
-    </div>
-    <div class="eta-item">
-      <span class="eta-label">Est. Start Time</span>
-      <span class="eta-value" id="etaStart">—</span>
-    </div>
-  </div>
-</div>
-
-<!-- Events list -->
-<div class="events-card">
-  <div class="card-label">
-    <span>Event Schedule</span>
-    <span id="eventsCountLabel" style="color:var(--muted)">—</span>
-  </div>
-  <div class="events-list" id="eventsList">
-    <div class="empty-state">Event schedule will appear after first check.</div>
-  </div>
-</div>
-
-<!-- Log -->
-<div class="log-card">
-  <div class="card-label">Activity Log</div>
-  <div class="log-entries" id="logEntries">
-    <div class="log-entry"><span class="log-time">--:--:--</span><span class="log-msg">Ready. Configure and press Start.</span></div>
-  </div>
-</div>
-
-<script>
-let monitorInterval = null;
-let nextCheckTimer = null;
-let isChecking = false;
-let state = {
-  events: [],
-  currentLiveIndex: -1,
-  targetIndex: -1,
-  alertFired: false,
-  lastCheckTime: null,
-  avgEventDuration: null, // minutes
-  eventTimestamps: [], // {index, time}
-};
-
-function log(msg, type = '') {
-  const now = new Date();
-  const t = now.toTimeString().slice(0,8);
-  const el = document.createElement('div');
-  el.className = 'log-entry';
-  el.innerHTML = `<span class="log-time">${t}</span><span class="log-msg ${type}">${msg}</span>`;
-  const container = document.getElementById('logEntries');
-  container.appendChild(el);
-  container.scrollTop = container.scrollHeight;
+  // Parse JSON from response
+  const clean = text.replace(/```json|```/g, '').trim();
+  const jsonMatch = clean.match(/\{[\s\S]*\}/);
+  if (!jsonMatch) throw new Error('Claude response had no JSON');
+  const parsed = JSON.parse(jsonMatch[0]);
+  return normalizeClaude(parsed, target);
 }
 
-function setStatus(s) {
-  const pill = document.getElementById('statusPill');
-  pill.className = 'status-pill ' + s;
-  const labels = { idle: 'Idle', monitoring: 'Monitoring', alerted: 'Alert!' };
-  pill.textContent = labels[s] || s;
+function parseDirectApi(json, target) {
+  // Handle various API shapes
+  const list = Array.isArray(json) ? json : json.events || json.data || [];
+  const events = list.map(e => ({
+    name: e.name || e.event_name || e.title || String(e),
+    isLive: !!(e.live || e.is_live || e.status === 'live' || e.status === 'active')
+  }));
+  return normalize(events, target);
 }
 
-function dismissAlert() {
-  document.getElementById('alertBanner').style.display = 'none';
+function normalizeClaude(parsed, target) {
+  const events = (parsed.events || []).map(e => ({
+    name: e.name || '',
+    isLive: !!e.isLive
+  }));
+  return normalize(events, target);
 }
 
-function showAlert(msg) {
-  const el = document.getElementById('alertBanner');
-  document.getElementById('alertText').textContent = msg;
-  el.style.display = 'flex';
-  setStatus('alerted');
-  // Try browser notification
-  if ('Notification' in window && Notification.permission === 'granted') {
-    new Notification('Meet Monitor Alert', { body: msg, icon: '' });
-  }
-  log('🚨 ' + msg, 'alert');
-}
-
-
-
-async function fetchMeetData(url, apiKey) {
-  const target = document.getElementById('targetEvent').value.trim();
-  const prompt = `Search the web for the current status of this track & field meet: ${url}
-
-Visit the page and find the full event schedule. Look for:
-1. A list of all events with their order/numbers
-2. Which event has a "Live" indicator (currently happening)
-3. Which events are completed vs upcoming
-
-Then respond with ONLY a JSON code block (no explanation), like this:
-\`\`\`json
-{
-  "events": [
-    { "number": 1, "name": "Boys 100m Dash", "status": "done" },
-    { "number": 2, "name": "Girls 100m Dash", "status": "live" },
-    { "number": 3, "name": "Boys 200m Dash", "status": "upcoming" }
-  ],
-  "liveEvent": "Girls 100m Dash",
-  "liveIndex": 1
-}
-\`\`\`
-
-Status must be exactly: "done", "live", or "upcoming".
-liveIndex is the 0-based array index of the live event.
-The target event I care about is: "${target}" — make sure it appears in the list if it's on the schedule.
-If you cannot load the page or find events, return: \`\`\`json\n{"events":[],"liveEvent":null,"liveIndex":-1}\`\`\``;
-
-  const raw = await callClaude(prompt, apiKey);
-  log(`Raw response (first 200 chars): ${raw.slice(0,200)}`, '');
-
-  // Try extracting JSON from code block first, then bare JSON
-  let jsonStr = null;
-  const codeBlock = raw.match(/```json\s*([\s\S]*?)```/);
-  if (codeBlock) {
-    jsonStr = codeBlock[1].trim();
-  } else {
-    // Fall back to finding outermost { ... }
-    const bare = raw.match(/\{[\s\S]*\}/);
-    if (bare) jsonStr = bare[0];
-  }
-
-  if (!jsonStr) throw new Error(`Could not find JSON in response. Raw: ${raw.slice(0,300)}`);
-
-  try {
-    return JSON.parse(jsonStr);
-  } catch(e) {
-    throw new Error(`JSON parse failed: ${e.message}. Raw JSON: ${jsonStr.slice(0,200)}`);
-  }
-}
-
-function updateUI(data) {
-  const target = document.getElementById('targetEvent').value.trim().toLowerCase();
-  const alertOffset = parseInt(document.getElementById('alertOffset').value) || 3;
-
-  state.events = data.events || [];
-  state.currentLiveIndex = data.liveIndex ?? -1;
-  state.targetIndex = state.events.findIndex(e => e.name.toLowerCase().includes(target));
-
-  // Track timestamps for avg estimation
-  if (state.currentLiveIndex >= 0) {
-    const now = Date.now();
-    const existing = state.eventTimestamps.find(t => t.index === state.currentLiveIndex);
-    if (!existing) {
-      state.eventTimestamps.push({ index: state.currentLiveIndex, time: now });
-      // Compute avg from last few transitions
-      if (state.eventTimestamps.length >= 2) {
-        const sorted = [...state.eventTimestamps].sort((a,b) => a.index - b.index);
-        const diffs = [];
-        for (let i = 1; i < sorted.length; i++) {
-          const dt = (sorted[i].time - sorted[i-1].time) / 60000;
-          const di = sorted[i].index - sorted[i-1].index;
-          if (di > 0) diffs.push(dt / di);
-        }
-        if (diffs.length) state.avgEventDuration = diffs.reduce((a,b)=>a+b,0)/diffs.length;
-      }
-    }
-  }
-
-  // Update current event display
-  const liveEvent = state.events[state.currentLiveIndex];
-  const display = document.getElementById('currentEventDisplay');
-  document.getElementById('liveDotLabel').style.display = liveEvent ? 'flex' : 'none';
-
-  if (liveEvent) {
-    display.innerHTML = `
-      <div class="event-number">#${state.currentLiveIndex + 1}</div>
-      <div>
-        <div class="event-name">${liveEvent.name}</div>
-        <div class="event-meta">Event ${liveEvent.number ?? state.currentLiveIndex + 1} of ${state.events.length}</div>
-      </div>`;
-  } else {
-    display.innerHTML = `<div class="empty-state">Could not identify live event.<br>Will retry on next check.</div>`;
-  }
-
-  // ETA
-  const etaRow = document.getElementById('etaRow');
-  if (state.targetIndex >= 0 && state.currentLiveIndex >= 0) {
-    const eventsLeft = state.targetIndex - state.currentLiveIndex;
-    document.getElementById('etaEvents').textContent = eventsLeft > 0 ? `${eventsLeft} event${eventsLeft !== 1 ? 's' : ''}` : eventsLeft === 0 ? 'NOW' : 'Passed';
-    if (state.avgEventDuration && eventsLeft > 0) {
-      const mins = Math.round(state.avgEventDuration * eventsLeft);
-      document.getElementById('etaTime').textContent = `~${mins} min`;
-      document.getElementById('etaAvg').textContent = `~${Math.round(state.avgEventDuration)} min/event`;
-      const startTime = new Date(Date.now() + mins * 60000);
-      document.getElementById('etaStart').textContent = startTime.toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'});
-    } else {
-      document.getElementById('etaTime').textContent = 'Estimating…';
-      document.getElementById('etaAvg').textContent = 'Estimating…';
-      document.getElementById('etaStart').textContent = '—';
-    }
-    etaRow.style.display = 'flex';
-  } else {
-    etaRow.style.display = 'none';
-  }
-
-  // Events list
-  const list = document.getElementById('eventsList');
-  if (state.events.length === 0) {
-    list.innerHTML = '<div class="empty-state">No events found. The meet may not have started or the page couldn\'t be read.</div>';
-  } else {
-    document.getElementById('eventsCountLabel').textContent = `${state.events.length} events`;
-    list.innerHTML = state.events.map((ev, i) => {
-      const isLive = i === state.currentLiveIndex;
-      const isTarget = i === state.targetIndex;
-      const isDone = ev.status === 'done' && !isLive;
-      const eventsFromLive = i - state.currentLiveIndex;
-      const isSoon = !isLive && !isTarget && !isDone && eventsFromLive > 0 && eventsFromLive <= alertOffset;
-
-      let cls = '';
-      if (isLive) cls = 'is-live';
-      else if (isTarget) cls = 'is-target';
-      else if (isSoon) cls = 'is-warn';
-      else if (isDone) cls = 'is-done';
-
-      let badge = '';
-      if (isLive) badge = '<span class="ev-badge badge-live">Live</span>';
-      else if (isTarget) badge = '<span class="ev-badge badge-target">Target</span>';
-      else if (isSoon) badge = '<span class="ev-badge badge-soon">Soon</span>';
-      else if (isDone) badge = '<span class="ev-badge badge-done">Done</span>';
-
-      let eta = '';
-      if (!isDone && !isLive && state.currentLiveIndex >= 0 && eventsFromLive > 0 && state.avgEventDuration) {
-        const m = Math.round(state.avgEventDuration * eventsFromLive);
-        eta = `~${m}m`;
-      }
-
-      return `<div class="event-row ${cls}">
-        <span class="ev-num">${ev.number ?? i+1}</span>
-        ${badge}
-        <span class="ev-name">${ev.name}</span>
-        <span class="ev-est">${eta}</span>
-      </div>`;
-    }).join('');
-
-    // Scroll live event into view
-    setTimeout(() => {
-      const liveRow = list.querySelectorAll('.event-row')[state.currentLiveIndex];
-      if (liveRow) liveRow.scrollIntoView({ behavior: 'smooth', block: 'center' });
-    }, 100);
-  }
-
-  // Check alert condition
-  if (!state.alertFired && state.targetIndex >= 0 && state.currentLiveIndex >= 0) {
-    const eventsLeft = state.targetIndex - state.currentLiveIndex;
-    if (eventsLeft <= alertOffset && eventsLeft > 0) {
-      showAlert(`⚡ ${alertOffset} events until ${document.getElementById('targetEvent').value}! Get ready!`);
-      state.alertFired = true;
-    } else if (eventsLeft <= 0) {
-      showAlert(`🏃 ${document.getElementById('targetEvent').value} is happening NOW or next!`);
-      state.alertFired = true;
-    }
-  }
-}
-
-let nextCheckCountdown = 0;
-let countdownTick = null;
-
-function startCountdown(seconds) {
-  clearInterval(countdownTick);
-  nextCheckCountdown = seconds;
-  const label = document.getElementById('nextCheckLabel');
-  const fill = document.getElementById('nextCheckFill');
-
-  function tick() {
-    nextCheckCountdown--;
-    const pct = ((seconds - nextCheckCountdown) / seconds) * 100;
-    fill.style.width = pct + '%';
-    if (nextCheckCountdown <= 0) {
-      label.textContent = 'Checking now…';
-      clearInterval(countdownTick);
-    } else {
-      label.textContent = `Next check in ${nextCheckCountdown}s`;
-    }
-  }
-  label.textContent = `Next check in ${seconds}s`;
-  fill.style.width = '0%';
-  countdownTick = setInterval(tick, 1000);
+function normalize(events, target) {
+  const tLow = target.toLowerCase();
+  let currentLiveIndex = events.findIndex(e => e.isLive);
+  let targetIndex = events.findIndex(e => e.name.toLowerCase().includes(tLow));
+  return { events, currentLiveIndex, targetIndex };
 }
 
 async function doCheck() {
   if (isChecking) return;
   isChecking = true;
-
-  const apiKey = document.getElementById('apiKey').value.trim();
-  const url = document.getElementById('meetUrl').value.trim();
-
-  document.getElementById('btnCheck').innerHTML = '↻ Checking<span class="spinner"></span>';
+  setStatus('checking');
+  document.getElementById('btnCheck').disabled = true;
 
   try {
-    log(`Starting check... API key length: ${apiKey.length}`, 'info');
-
-    // Step 1: Raw fetch test
-    log('Step 1: Sending API request...', 'info');
-    let rawResp, rawData;
-    try {
-      rawResp = await fetch('https://api.anthropic.com/v1/messages', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'x-api-key': apiKey,
-          'anthropic-version': '2023-06-01',
-          'anthropic-dangerous-direct-browser-access': 'true'
-        },
-        body: JSON.stringify({
-          model: 'claude-haiku-4-5-20251001',
-          max_tokens: 100,
-          messages: [{ role: 'user', content: 'Say the word READY and nothing else.' }]
-        })
-      });
-      log(`Step 1 response: HTTP ${rawResp.status}`, rawResp.ok ? 'success' : 'error');
-      rawData = await rawResp.json();
-      log(`Step 1 body: ${JSON.stringify(rawData).slice(0,300)}`, rawResp.ok ? '' : 'error');
-    } catch(e) {
-      log(`Step 1 FAILED (network/CORS?): ${e.message}`, 'error');
-      return;
-    }
-
-    if (!rawResp.ok) {
-      log(`API rejected request. Not proceeding.`, 'error');
-      return;
-    }
-
-    log('Step 1 passed! Now fetching meet data...', 'success');
-    const data = await fetchMeetData(url, apiKey);
+    const result = await fetchMeetData();
+    state.events = result.events;
+    state.currentLiveIndex = result.currentLiveIndex;
+    state.targetIndex = result.targetIndex;
     state.lastCheckTime = new Date();
 
-    if (data.events.length > 0) {
-      log(`Got ${data.events.length} events. Live: ${data.liveEvent || 'unknown'}`, 'success');
-    } else {
-      log('No events returned. Page may be loading slowly.', 'warn');
-    }
+    const liveName = state.currentLiveIndex >= 0 ? state.events[state.currentLiveIndex]?.name : 'none';
+    const targetName = state.targetIndex >= 0 ? state.events[state.targetIndex]?.name : 'not found';
+    log(`Live: "${liveName}" | Target: "${targetName}" (index ${state.targetIndex})`, 'ok');
 
-    updateUI(data);
-  } catch (e) {
-    log(`Error: ${e.message}`, 'error');
-    log(`Stack: ${e.stack ? e.stack.slice(0,200) : 'none'}`, 'error');
+    updateUI();
+    checkAlert();
+    setStatus('running');
+  } catch(e) {
+    log(`Error: ${e.message}`, 'err');
+    setStatus('running');
   } finally {
     isChecking = false;
-    document.getElementById('btnCheck').textContent = '↻ Check Now';
+    document.getElementById('btnCheck').disabled = false;
   }
 }
 
-async function checkNow() {
-  await doCheck();
-  // Restart countdown
-  if (monitorInterval) {
-    clearInterval(monitorInterval);
-    const mins = parseFloat(document.getElementById('checkInterval').value) || 2;
-    startCountdown(mins * 60);
-    monitorInterval = setInterval(async () => {
-      await doCheck();
-      startCountdown(mins * 60);
-    }, mins * 60 * 1000);
-  }
+function startCountdown() {
+  const intervalMin = parseInt(document.getElementById('checkInterval').value) || 2;
+  const intervalMs = intervalMin * 60 * 1000;
+  let elapsed = 0;
+  const fill = document.getElementById('progressFill');
+  const label = document.getElementById('nextCheckLabel');
+
+  if (countdownInterval) clearInterval(countdownInterval);
+  countdownInterval = setInterval(() => {
+    elapsed += 1000;
+    const pct = Math.min(100, (elapsed / intervalMs) * 100);
+    fill.style.width = pct + '%';
+    const remaining = Math.max(0, Math.round((intervalMs - elapsed) / 1000));
+    label.textContent = `Next check in ${remaining}s`;
+    if (elapsed >= intervalMs) elapsed = 0;
+  }, 1000);
 }
 
-async function startMonitoring() {
+function startMonitoring() {
   const apiKey = document.getElementById('apiKey').value.trim();
-  if (!apiKey || !apiKey.startsWith('sk-ant')) {
-    alert('Please enter a valid Anthropic API key (starts with sk-ant-)');
-    return;
-  }
+  if (!apiKey) { log('Please enter your Anthropic API key', 'err'); return; }
 
-  // Request notification permission
-  if ('Notification' in window && Notification.permission === 'default') {
-    await Notification.requestPermission();
-  }
-
-  state.alertFired = false;
-  state.eventTimestamps = [];
+  const intervalMin = parseInt(document.getElementById('checkInterval').value) || 2;
+  log(`Starting — checking every ${intervalMin} min`);
+  setStatus('running');
 
   document.getElementById('btnStart').disabled = true;
-  document.getElementById('btnStop').disabled = false;
   document.getElementById('btnCheck').disabled = false;
-  setStatus('monitoring');
-  log('Monitoring started.', 'info');
+  document.getElementById('btnStop').disabled = false;
 
-  const mins = parseFloat(document.getElementById('checkInterval').value) || 2;
-  await doCheck();
-  startCountdown(mins * 60);
+  if (Notification.permission === 'default') Notification.requestPermission();
 
-  monitorInterval = setInterval(async () => {
-    await doCheck();
-    startCountdown(mins * 60);
-  }, mins * 60 * 1000);
+  doCheck();
+  monitorInterval = setInterval(doCheck, intervalMin * 60 * 1000);
+  startCountdown();
+}
+
+function checkNow() {
+  log('Manual check triggered');
+  doCheck();
 }
 
 function stopMonitoring() {
   clearInterval(monitorInterval);
-  clearInterval(countdownTick);
+  clearInterval(countdownInterval);
   monitorInterval = null;
+  countdownInterval = null;
+  isChecking = false;
   document.getElementById('btnStart').disabled = false;
-  document.getElementById('btnStop').disabled = true;
   document.getElementById('btnCheck').disabled = true;
+  document.getElementById('btnStop').disabled = true;
+  document.getElementById('progressFill').style.width = '0%';
   document.getElementById('nextCheckLabel').textContent = '';
-  document.getElementById('nextCheckFill').style.width = '0%';
   setStatus('idle');
   log('Monitoring stopped.', 'warn');
 }
 
-// Wire up buttons via addEventListener (more reliable on iOS Safari)
-document.addEventListener('DOMContentLoaded', function() {
-  document.getElementById('btnStart').addEventListener('click', startMonitoring);
-  document.getElementById('btnCheck').addEventListener('click', checkNow);
-  document.getElementById('btnStop').addEventListener('click', stopMonitoring);
-  var dismiss = document.getElementById('btnDismiss');
-  if (dismiss) dismiss.addEventListener('click', dismissAlert);
-});
+function dismissAlert() {
+  document.getElementById('alertBanner').classList.remove('visible');
+}
+
+// Wire up buttons
+document.getElementById('btnStart').addEventListener('click', startMonitoring);
+document.getElementById('btnCheck').addEventListener('click', checkNow);
+document.getElementById('btnStop').addEventListener('click', stopMonitoring);
+document.getElementById('btnDismiss').addEventListener('click', dismissAlert);
 </script>
 </body>
 </html>
