@@ -1,0 +1,1013 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<html>
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+  <meta http-equiv="Content-Style-Type" content="text/css">
+  <title></title>
+  <meta name="Generator" content="Cocoa HTML Writer">
+  <meta name="CocoaVersion" content="2022.3">
+  <style type="text/css">
+    p.p1 {margin: 0.0px 0.0px 0.0px 0.0px; font: 12.0px Helvetica; -webkit-text-stroke: #000000}
+    p.p2 {margin: 0.0px 0.0px 0.0px 0.0px; font: 12.0px Helvetica; -webkit-text-stroke: #000000; min-height: 14.0px}
+    p.p3 {margin: 0.0px 0.0px 0.0px 0.0px; font: 12.0px Helvetica; color: #094fd1; -webkit-text-stroke: #094fd1}
+    span.s1 {font-kerning: none}
+    span.s2 {font-kerning: none; color: #000000; -webkit-text-stroke: 0px #000000}
+    span.s3 {text-decoration: underline ; font-kerning: none; -webkit-text-stroke: 0px #094fd1}
+    span.s4 {text-decoration: underline ; font-kerning: none; color: #094fd1; -webkit-text-stroke: 0px #094fd1}
+    span.s5 {font: 12.0px 'Apple Color Emoji'; font-kerning: none}
+    span.s6 {font: 12.0px '.Apple Symbols Fallback'; font-kerning: none}
+    span.s7 {font: 12.0px 'Lucida Grande'; font-kerning: none}
+    span.s8 {font: 12.0px Menlo; font-kerning: none}
+  </style>
+</head>
+<body>
+<p class="p1"><span class="s1">&lt;!DOCTYPE html&gt;</span></p>
+<p class="p2"><span class="s1"></span><br></p>
+<p class="p1"><span class="s1">&lt;html lang="en"&gt;</span></p>
+<p class="p1"><span class="s1">&lt;head&gt;</span></p>
+<p class="p1"><span class="s1">&lt;meta charset="UTF-8"&gt;</span></p>
+<p class="p1"><span class="s1">&lt;meta name="viewport" content="width=device-width, initial-scale=1.0"&gt;</span></p>
+<p class="p1"><span class="s1">&lt;title&gt;Meet Monitor — Girls 4x400 Tracker&lt;/title&gt;</span></p>
+<p class="p1"><span class="s1">&lt;style&gt;</span></p>
+<p class="p3"><span class="s2">  @import url('<a href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&amp;family=Barlow+Condensed:wght@300;500;700;900&amp;display=swap"><span class="s3">https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&amp;family=Barlow+Condensed:wght@300;500;700;900&amp;display=swap</span></a>');</span></p>
+<p class="p2"><span class="s1"></span><br></p>
+<p class="p1"><span class="s1">:root {</span></p>
+<p class="p1"><span class="s1">–bg: #0a0c10;</span></p>
+<p class="p1"><span class="s1">–surface: #111318;</span></p>
+<p class="p1"><span class="s1">–border: #1e2230;</span></p>
+<p class="p1"><span class="s1">–accent: #00e5ff;</span></p>
+<p class="p1"><span class="s1">–accent2: #ff3d71;</span></p>
+<p class="p1"><span class="s1">–warn: #ffaa00;</span></p>
+<p class="p1"><span class="s1">–green: #00e676;</span></p>
+<p class="p1"><span class="s1">–text: #e0e6f0;</span></p>
+<p class="p1"><span class="s1">–muted: #5a6480;</span></p>
+<p class="p1"><span class="s1">–live: #ff3d71;</span></p>
+<p class="p1"><span class="s1">}</span></p>
+<p class="p2"><span class="s1"></span><br></p>
+<p class="p1"><span class="s1">- { box-sizing: border-box; margin: 0; padding: 0; }</span></p>
+<p class="p2"><span class="s1"></span><br></p>
+<p class="p1"><span class="s1">body {</span></p>
+<p class="p1"><span class="s1">background: var(–bg);</span></p>
+<p class="p1"><span class="s1">color: var(–text);</span></p>
+<p class="p1"><span class="s1">font-family: ‘Barlow Condensed’, sans-serif;</span></p>
+<p class="p1"><span class="s1">min-height: 100vh;</span></p>
+<p class="p1"><span class="s1">display: flex;</span></p>
+<p class="p1"><span class="s1">flex-direction: column;</span></p>
+<p class="p1"><span class="s1">align-items: center;</span></p>
+<p class="p1"><span class="s1">padding: 24px 16px 60px;</span></p>
+<p class="p1"><span class="s1">}</span></p>
+<p class="p2"><span class="s1"></span><br></p>
+<p class="p1"><span class="s1">/* Scanline overlay */</span></p>
+<p class="p1"><span class="s1">body::before {</span></p>
+<p class="p1"><span class="s1">content: ‘’;</span></p>
+<p class="p1"><span class="s1">position: fixed;</span></p>
+<p class="p1"><span class="s1">inset: 0;</span></p>
+<p class="p1"><span class="s1">background: repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0,229,255,0.015) 2px, rgba(0,229,255,0.015) 4px);</span></p>
+<p class="p1"><span class="s1">pointer-events: none;</span></p>
+<p class="p1"><span class="s1">z-index: 999;</span></p>
+<p class="p1"><span class="s1">}</span></p>
+<p class="p2"><span class="s1"></span><br></p>
+<p class="p1"><span class="s1">header {</span></p>
+<p class="p1"><span class="s1">width: 100%;</span></p>
+<p class="p1"><span class="s1">max-width: 720px;</span></p>
+<p class="p1"><span class="s1">margin-bottom: 28px;</span></p>
+<p class="p1"><span class="s1">border-bottom: 1px solid var(–border);</span></p>
+<p class="p1"><span class="s1">padding-bottom: 20px;</span></p>
+<p class="p1"><span class="s1">display: flex;</span></p>
+<p class="p1"><span class="s1">flex-direction: column;</span></p>
+<p class="p1"><span class="s1">gap: 6px;</span></p>
+<p class="p1"><span class="s1">}</span></p>
+<p class="p2"><span class="s1"></span><br></p>
+<p class="p1"><span class="s1">.header-top {</span></p>
+<p class="p1"><span class="s1">display: flex;</span></p>
+<p class="p1"><span class="s1">align-items: baseline;</span></p>
+<p class="p1"><span class="s1">justify-content: space-between;</span></p>
+<p class="p1"><span class="s1">gap: 12px;</span></p>
+<p class="p1"><span class="s1">}</span></p>
+<p class="p2"><span class="s1"></span><br></p>
+<p class="p1"><span class="s1">h1 {</span></p>
+<p class="p1"><span class="s1">font-family: ‘Barlow Condensed’, sans-serif;</span></p>
+<p class="p1"><span class="s1">font-weight: 900;</span></p>
+<p class="p1"><span class="s1">font-size: 2.4rem;</span></p>
+<p class="p1"><span class="s1">letter-spacing: 0.04em;</span></p>
+<p class="p1"><span class="s1">text-transform: uppercase;</span></p>
+<p class="p1"><span class="s1">color: var(–accent);</span></p>
+<p class="p1"><span class="s1">text-shadow: 0 0 20px rgba(0,229,255,0.4);</span></p>
+<p class="p1"><span class="s1">line-height: 1;</span></p>
+<p class="p1"><span class="s1">}</span></p>
+<p class="p2"><span class="s1"></span><br></p>
+<p class="p1"><span class="s1">.subtitle {</span></p>
+<p class="p1"><span class="s1">font-family: ‘Space Mono’, monospace;</span></p>
+<p class="p1"><span class="s1">font-size: 0.65rem;</span></p>
+<p class="p1"><span class="s1">color: var(–muted);</span></p>
+<p class="p1"><span class="s1">letter-spacing: 0.08em;</span></p>
+<p class="p1"><span class="s1">text-transform: uppercase;</span></p>
+<p class="p1"><span class="s1">}</span></p>
+<p class="p2"><span class="s1"></span><br></p>
+<p class="p1"><span class="s1">.status-pill {</span></p>
+<p class="p1"><span class="s1">font-family: ‘Space Mono’, monospace;</span></p>
+<p class="p1"><span class="s1">font-size: 0.65rem;</span></p>
+<p class="p1"><span class="s1">padding: 4px 10px;</span></p>
+<p class="p1"><span class="s1">border-radius: 2px;</span></p>
+<p class="p1"><span class="s1">border: 1px solid;</span></p>
+<p class="p1"><span class="s1">text-transform: uppercase;</span></p>
+<p class="p1"><span class="s1">letter-spacing: 0.1em;</span></p>
+<p class="p1"><span class="s1">white-space: nowrap;</span></p>
+<p class="p1"><span class="s1">}</span></p>
+<p class="p1"><span class="s1">.status-pill.idle { color: var(–muted); border-color: var(–muted); }</span></p>
+<p class="p1"><span class="s1">.status-pill.monitoring { color: var(–accent); border-color: var(–accent); animation: pulse-border 2s infinite; }</span></p>
+<p class="p1"><span class="s1">.status-pill.alerted { color: var(–accent2); border-color: var(–accent2); animation: pulse-border-red 1s infinite; }</span></p>
+<p class="p2"><span class="s1"></span><br></p>
+<p class="p1"><span class="s1">@keyframes pulse-border {</span></p>
+<p class="p1"><span class="s1">0%, 100% { box-shadow: 0 0 0 0 rgba(0,229,255,0.3); }</span></p>
+<p class="p1"><span class="s1">50% { box-shadow: 0 0 0 4px rgba(0,229,255,0.1); }</span></p>
+<p class="p1"><span class="s1">}</span></p>
+<p class="p1"><span class="s1">@keyframes pulse-border-red {</span></p>
+<p class="p1"><span class="s1">0%, 100% { box-shadow: 0 0 0 0 rgba(255,61,113,0.4); }</span></p>
+<p class="p1"><span class="s1">50% { box-shadow: 0 0 0 6px rgba(255,61,113,0.1); }</span></p>
+<p class="p1"><span class="s1">}</span></p>
+<p class="p2"><span class="s1"></span><br></p>
+<p class="p1"><span class="s1">.main-card {</span></p>
+<p class="p1"><span class="s1">width: 100%;</span></p>
+<p class="p1"><span class="s1">max-width: 720px;</span></p>
+<p class="p1"><span class="s1">background: var(–surface);</span></p>
+<p class="p1"><span class="s1">border: 1px solid var(–border);</span></p>
+<p class="p1"><span class="s1">padding: 24px;</span></p>
+<p class="p1"><span class="s1">margin-bottom: 16px;</span></p>
+<p class="p1"><span class="s1">}</span></p>
+<p class="p2"><span class="s1"></span><br></p>
+<p class="p1"><span class="s1">.config-row {</span></p>
+<p class="p1"><span class="s1">display: grid;</span></p>
+<p class="p1"><span class="s1">grid-template-columns: 1fr 1fr;</span></p>
+<p class="p1"><span class="s1">gap: 12px;</span></p>
+<p class="p1"><span class="s1">margin-bottom: 16px;</span></p>
+<p class="p1"><span class="s1">}</span></p>
+<p class="p2"><span class="s1"></span><br></p>
+<p class="p1"><span class="s1">.field-group {</span></p>
+<p class="p1"><span class="s1">display: flex;</span></p>
+<p class="p1"><span class="s1">flex-direction: column;</span></p>
+<p class="p1"><span class="s1">gap: 6px;</span></p>
+<p class="p1"><span class="s1">}</span></p>
+<p class="p2"><span class="s1"></span><br></p>
+<p class="p1"><span class="s1">label {</span></p>
+<p class="p1"><span class="s1">font-family: ‘Space Mono’, monospace;</span></p>
+<p class="p1"><span class="s1">font-size: 0.6rem;</span></p>
+<p class="p1"><span class="s1">color: var(–muted);</span></p>
+<p class="p1"><span class="s1">text-transform: uppercase;</span></p>
+<p class="p1"><span class="s1">letter-spacing: 0.1em;</span></p>
+<p class="p1"><span class="s1">}</span></p>
+<p class="p2"><span class="s1"></span><br></p>
+<p class="p1"><span class="s1">input {</span></p>
+<p class="p1"><span class="s1">background: #0d0f14;</span></p>
+<p class="p1"><span class="s1">border: 1px solid var(–border);</span></p>
+<p class="p1"><span class="s1">color: var(–text);</span></p>
+<p class="p1"><span class="s1">font-family: ‘Space Mono’, monospace;</span></p>
+<p class="p1"><span class="s1">font-size: 0.8rem;</span></p>
+<p class="p1"><span class="s1">padding: 10px 12px;</span></p>
+<p class="p1"><span class="s1">outline: none;</span></p>
+<p class="p1"><span class="s1">width: 100%;</span></p>
+<p class="p1"><span class="s1">transition: border-color 0.2s;</span></p>
+<p class="p1"><span class="s1">}</span></p>
+<p class="p1"><span class="s1">input:focus { border-color: var(–accent); }</span></p>
+<p class="p2"><span class="s1"></span><br></p>
+<p class="p1"><span class="s1">.input-full { grid-column: 1 / -1; }</span></p>
+<p class="p2"><span class="s1"></span><br></p>
+<p class="p1"><span class="s1">.controls {</span></p>
+<p class="p1"><span class="s1">display: flex;</span></p>
+<p class="p1"><span class="s1">gap: 10px;</span></p>
+<p class="p1"><span class="s1">margin-top: 4px;</span></p>
+<p class="p1"><span class="s1">}</span></p>
+<p class="p2"><span class="s1"></span><br></p>
+<p class="p1"><span class="s1">button {</span></p>
+<p class="p1"><span class="s1">font-family: ‘Barlow Condensed’, sans-serif;</span></p>
+<p class="p1"><span class="s1">font-weight: 700;</span></p>
+<p class="p1"><span class="s1">font-size: 1rem;</span></p>
+<p class="p1"><span class="s1">letter-spacing: 0.08em;</span></p>
+<p class="p1"><span class="s1">text-transform: uppercase;</span></p>
+<p class="p1"><span class="s1">padding: 10px 20px;</span></p>
+<p class="p1"><span class="s1">border: none;</span></p>
+<p class="p1"><span class="s1">cursor: pointer;</span></p>
+<p class="p1"><span class="s1">transition: all 0.15s;</span></p>
+<p class="p1"><span class="s1">}</span></p>
+<p class="p2"><span class="s1"></span><br></p>
+<p class="p1"><span class="s1">.btn-start {</span></p>
+<p class="p1"><span class="s1">background: var(–accent);</span></p>
+<p class="p1"><span class="s1">color: #000;</span></p>
+<p class="p1"><span class="s1">flex: 1;</span></p>
+<p class="p1"><span class="s1">}</span></p>
+<p class="p1"><span class="s1">.btn-start:hover { background: #33eaff; }</span></p>
+<p class="p1"><span class="s1">.btn-start:disabled { background: #1e2230; color: var(–muted); cursor: not-allowed; }</span></p>
+<p class="p2"><span class="s1"></span><br></p>
+<p class="p1"><span class="s1">.btn-stop {</span></p>
+<p class="p1"><span class="s1">background: transparent;</span></p>
+<p class="p1"><span class="s1">color: var(–accent2);</span></p>
+<p class="p1"><span class="s1">border: 1px solid var(–accent2);</span></p>
+<p class="p1"><span class="s1">flex: 1;</span></p>
+<p class="p1"><span class="s1">}</span></p>
+<p class="p1"><span class="s1">.btn-stop:hover { background: rgba(255,61,113,0.1); }</span></p>
+<p class="p1"><span class="s1">.btn-stop:disabled { opacity: 0.3; cursor: not-allowed; }</span></p>
+<p class="p2"><span class="s1"></span><br></p>
+<p class="p1"><span class="s1">.btn-check {</span></p>
+<p class="p1"><span class="s1">background: transparent;</span></p>
+<p class="p1"><span class="s1">color: var(–warn);</span></p>
+<p class="p1"><span class="s1">border: 1px solid var(–warn);</span></p>
+<p class="p1"><span class="s1">flex: 1;</span></p>
+<p class="p1"><span class="s1">}</span></p>
+<p class="p1"><span class="s1">.btn-check:hover { background: rgba(255,170,0,0.1); }</span></p>
+<p class="p1"><span class="s1">.btn-check:disabled { opacity: 0.3; cursor: not-allowed; }</span></p>
+<p class="p2"><span class="s1"></span><br></p>
+<p class="p1"><span class="s1">/* Current Event Display */</span></p>
+<p class="p1"><span class="s1">.current-event-card {</span></p>
+<p class="p1"><span class="s1">width: 100%;</span></p>
+<p class="p1"><span class="s1">max-width: 720px;</span></p>
+<p class="p1"><span class="s1">border: 1px solid var(–border);</span></p>
+<p class="p1"><span class="s1">margin-bottom: 16px;</span></p>
+<p class="p1"><span class="s1">overflow: hidden;</span></p>
+<p class="p1"><span class="s1">}</span></p>
+<p class="p2"><span class="s1"></span><br></p>
+<p class="p1"><span class="s1">.card-label {</span></p>
+<p class="p1"><span class="s1">font-family: ‘Space Mono’, monospace;</span></p>
+<p class="p1"><span class="s1">font-size: 0.6rem;</span></p>
+<p class="p1"><span class="s1">color: var(–muted);</span></p>
+<p class="p1"><span class="s1">text-transform: uppercase;</span></p>
+<p class="p1"><span class="s1">letter-spacing: 0.12em;</span></p>
+<p class="p1"><span class="s1">padding: 8px 16px;</span></p>
+<p class="p1"><span class="s1">background: rgba(255,255,255,0.02);</span></p>
+<p class="p1"><span class="s1">border-bottom: 1px solid var(–border);</span></p>
+<p class="p1"><span class="s1">display: flex;</span></p>
+<p class="p1"><span class="s1">align-items: center;</span></p>
+<p class="p1"><span class="s1">justify-content: space-between;</span></p>
+<p class="p1"><span class="s1">}</span></p>
+<p class="p2"><span class="s1"></span><br></p>
+<p class="p1"><span class="s1">.live-dot {</span></p>
+<p class="p1"><span class="s1">display: inline-flex;</span></p>
+<p class="p1"><span class="s1">align-items: center;</span></p>
+<p class="p1"><span class="s1">gap: 6px;</span></p>
+<p class="p1"><span class="s1">color: var(–live);</span></p>
+<p class="p1"><span class="s1">}</span></p>
+<p class="p1"><span class="s1">.live-dot::before {</span></p>
+<p class="p1"><span class="s1">content: ‘’;</span></p>
+<p class="p1"><span class="s1">width: 6px; height: 6px;</span></p>
+<p class="p1"><span class="s1">background: var(–live);</span></p>
+<p class="p1"><span class="s1">border-radius: 50%;</span></p>
+<p class="p1"><span class="s1">animation: blink 1s infinite;</span></p>
+<p class="p1"><span class="s1">}</span></p>
+<p class="p1"><span class="s1">@keyframes blink {</span></p>
+<p class="p1"><span class="s1">0%, 100% { opacity: 1; }</span></p>
+<p class="p1"><span class="s1">50% { opacity: 0.2; }</span></p>
+<p class="p1"><span class="s1">}</span></p>
+<p class="p2"><span class="s1"></span><br></p>
+<p class="p1"><span class="s1">.event-display {</span></p>
+<p class="p1"><span class="s1">padding: 20px 16px;</span></p>
+<p class="p1"><span class="s1">display: flex;</span></p>
+<p class="p1"><span class="s1">align-items: center;</span></p>
+<p class="p1"><span class="s1">gap: 16px;</span></p>
+<p class="p1"><span class="s1">}</span></p>
+<p class="p2"><span class="s1"></span><br></p>
+<p class="p1"><span class="s1">.event-number {</span></p>
+<p class="p1"><span class="s1">font-family: ‘Space Mono’, monospace;</span></p>
+<p class="p1"><span class="s1">font-size: 2rem;</span></p>
+<p class="p1"><span class="s1">font-weight: 700;</span></p>
+<p class="p1"><span class="s1">color: var(–muted);</span></p>
+<p class="p1"><span class="s1">min-width: 48px;</span></p>
+<p class="p1"><span class="s1">text-align: center;</span></p>
+<p class="p1"><span class="s1">line-height: 1;</span></p>
+<p class="p1"><span class="s1">}</span></p>
+<p class="p2"><span class="s1"></span><br></p>
+<p class="p1"><span class="s1">.event-name {</span></p>
+<p class="p1"><span class="s1">font-family: ‘Barlow Condensed’, sans-serif;</span></p>
+<p class="p1"><span class="s1">font-weight: 700;</span></p>
+<p class="p1"><span class="s1">font-size: 2rem;</span></p>
+<p class="p1"><span class="s1">text-transform: uppercase;</span></p>
+<p class="p1"><span class="s1">letter-spacing: 0.02em;</span></p>
+<p class="p1"><span class="s1">line-height: 1.1;</span></p>
+<p class="p1"><span class="s1">}</span></p>
+<p class="p2"><span class="s1"></span><br></p>
+<p class="p1"><span class="s1">.event-meta {</span></p>
+<p class="p1"><span class="s1">font-family: ‘Space Mono’, monospace;</span></p>
+<p class="p1"><span class="s1">font-size: 0.65rem;</span></p>
+<p class="p1"><span class="s1">color: var(–muted);</span></p>
+<p class="p1"><span class="s1">margin-top: 4px;</span></p>
+<p class="p1"><span class="s1">}</span></p>
+<p class="p2"><span class="s1"></span><br></p>
+<p class="p1"><span class="s1">/* Progress / Events List */</span></p>
+<p class="p1"><span class="s1">.events-card {</span></p>
+<p class="p1"><span class="s1">width: 100%;</span></p>
+<p class="p1"><span class="s1">max-width: 720px;</span></p>
+<p class="p1"><span class="s1">border: 1px solid var(–border);</span></p>
+<p class="p1"><span class="s1">margin-bottom: 16px;</span></p>
+<p class="p1"><span class="s1">}</span></p>
+<p class="p2"><span class="s1"></span><br></p>
+<p class="p1"><span class="s1">.events-list {</span></p>
+<p class="p1"><span class="s1">max-height: 340px;</span></p>
+<p class="p1"><span class="s1">overflow-y: auto;</span></p>
+<p class="p1"><span class="s1">}</span></p>
+<p class="p1"><span class="s1">.events-list::-webkit-scrollbar { width: 3px; }</span></p>
+<p class="p1"><span class="s1">.events-list::-webkit-scrollbar-track { background: transparent; }</span></p>
+<p class="p1"><span class="s1">.events-list::-webkit-scrollbar-thumb { background: var(–border); }</span></p>
+<p class="p2"><span class="s1"></span><br></p>
+<p class="p1"><span class="s1">.event-row {</span></p>
+<p class="p1"><span class="s1">display: flex;</span></p>
+<p class="p1"><span class="s1">align-items: center;</span></p>
+<p class="p1"><span class="s1">gap: 12px;</span></p>
+<p class="p1"><span class="s1">padding: 10px 16px;</span></p>
+<p class="p1"><span class="s1">border-bottom: 1px solid rgba(30,34,48,0.6);</span></p>
+<p class="p1"><span class="s1">font-size: 0.95rem;</span></p>
+<p class="p1"><span class="s1">transition: background 0.15s;</span></p>
+<p class="p1"><span class="s1">position: relative;</span></p>
+<p class="p1"><span class="s1">}</span></p>
+<p class="p1"><span class="s1">.event-row:last-child { border-bottom: none; }</span></p>
+<p class="p2"><span class="s1"></span><br></p>
+<p class="p3"><span class="s2">.<a href="http://event-row.is/"><span class="s3">event-row.is</span></a>-live {</span></p>
+<p class="p1"><span class="s1">background: rgba(255,61,113,0.07);</span></p>
+<p class="p1"><span class="s1">}</span></p>
+<p class="p1"><span class="s1">.<a href="http://event-row.is/"><span class="s4">event-row.is</span></a>-live .ev-name { color: var(–live); }</span></p>
+<p class="p2"><span class="s1"></span><br></p>
+<p class="p3"><span class="s2">.<a href="http://event-row.is/"><span class="s3">event-row.is</span></a>-target {</span></p>
+<p class="p1"><span class="s1">background: rgba(0,229,255,0.05);</span></p>
+<p class="p1"><span class="s1">}</span></p>
+<p class="p1"><span class="s1">.<a href="http://event-row.is/"><span class="s4">event-row.is</span></a>-target .ev-name { color: var(–accent); }</span></p>
+<p class="p2"><span class="s1"></span><br></p>
+<p class="p3"><span class="s2">.<a href="http://event-row.is/"><span class="s3">event-row.is</span></a>-warn {</span></p>
+<p class="p1"><span class="s1">background: rgba(255,170,0,0.05);</span></p>
+<p class="p1"><span class="s1">}</span></p>
+<p class="p1"><span class="s1">.<a href="http://event-row.is/"><span class="s4">event-row.is</span></a>-warn .ev-name { color: var(–warn); }</span></p>
+<p class="p2"><span class="s1"></span><br></p>
+<p class="p1"><span class="s1">.<a href="http://event-row.is/"><span class="s4">event-row.is</span></a>-done { opacity: 0.35; }</span></p>
+<p class="p2"><span class="s1"></span><br></p>
+<p class="p1"><span class="s1">.ev-num {</span></p>
+<p class="p1"><span class="s1">font-family: ‘Space Mono’, monospace;</span></p>
+<p class="p1"><span class="s1">font-size: 0.65rem;</span></p>
+<p class="p1"><span class="s1">color: var(–muted);</span></p>
+<p class="p1"><span class="s1">min-width: 32px;</span></p>
+<p class="p1"><span class="s1">text-align: right;</span></p>
+<p class="p1"><span class="s1">}</span></p>
+<p class="p2"><span class="s1"></span><br></p>
+<p class="p1"><span class="s1">.ev-badge {</span></p>
+<p class="p1"><span class="s1">font-family: ‘Space Mono’, monospace;</span></p>
+<p class="p1"><span class="s1">font-size: 0.55rem;</span></p>
+<p class="p1"><span class="s1">text-transform: uppercase;</span></p>
+<p class="p1"><span class="s1">letter-spacing: 0.1em;</span></p>
+<p class="p1"><span class="s1">padding: 2px 6px;</span></p>
+<p class="p1"><span class="s1">border-radius: 1px;</span></p>
+<p class="p1"><span class="s1">white-space: nowrap;</span></p>
+<p class="p1"><span class="s1">}</span></p>
+<p class="p1"><span class="s1">.badge-live { background: var(–live); color: #fff; }</span></p>
+<p class="p1"><span class="s1">.badge-target { background: var(–accent); color: #000; }</span></p>
+<p class="p1"><span class="s1">.badge-soon { background: var(–warn); color: #000; }</span></p>
+<p class="p1"><span class="s1">.badge-done { background: #1e2230; color: var(–muted); }</span></p>
+<p class="p2"><span class="s1"></span><br></p>
+<p class="p1"><span class="s1">.ev-name { flex: 1; font-weight: 500; }</span></p>
+<p class="p1"><span class="s1">.ev-est { font-family: ‘Space Mono’, monospace; font-size: 0.6rem; color: var(–muted); }</span></p>
+<p class="p2"><span class="s1"></span><br></p>
+<p class="p1"><span class="s1">/* Log */</span></p>
+<p class="p1"><span class="s1">.log-card {</span></p>
+<p class="p1"><span class="s1">width: 100%;</span></p>
+<p class="p1"><span class="s1">max-width: 720px;</span></p>
+<p class="p1"><span class="s1">border: 1px solid var(–border);</span></p>
+<p class="p1"><span class="s1">}</span></p>
+<p class="p2"><span class="s1"></span><br></p>
+<p class="p1"><span class="s1">.log-entries {</span></p>
+<p class="p1"><span class="s1">font-family: ‘Space Mono’, monospace;</span></p>
+<p class="p1"><span class="s1">font-size: 0.65rem;</span></p>
+<p class="p1"><span class="s1">max-height: 200px;</span></p>
+<p class="p1"><span class="s1">overflow-y: auto;</span></p>
+<p class="p1"><span class="s1">padding: 12px 16px;</span></p>
+<p class="p1"><span class="s1">display: flex;</span></p>
+<p class="p1"><span class="s1">flex-direction: column;</span></p>
+<p class="p1"><span class="s1">gap: 4px;</span></p>
+<p class="p1"><span class="s1">}</span></p>
+<p class="p1"><span class="s1">.log-entries::-webkit-scrollbar { width: 3px; }</span></p>
+<p class="p1"><span class="s1">.log-entries::-webkit-scrollbar-thumb { background: var(–border); }</span></p>
+<p class="p2"><span class="s1"></span><br></p>
+<p class="p1"><span class="s1">.log-entry { display: flex; gap: 10px; }</span></p>
+<p class="p1"><span class="s1">.log-time { color: var(–muted); min-width: 56px; }</span></p>
+<p class="p1"><span class="s1">.log-msg { color: var(–text); line-height: 1.4; }</span></p>
+<p class="p1"><span class="s1">.<a href="http://log-msg.info/"><span class="s4">log-msg.info</span></a> { color: var(–accent); }</span></p>
+<p class="p1"><span class="s1">.log-msg.warn { color: var(–warn); }</span></p>
+<p class="p1"><span class="s1">.log-msg.alert { color: var(–accent2); }</span></p>
+<p class="p1"><span class="s1">.log-msg.success { color: var(–green); }</span></p>
+<p class="p1"><span class="s1">.log-msg.error { color: var(–accent2); }</span></p>
+<p class="p2"><span class="s1"></span><br></p>
+<p class="p1"><span class="s1">/* Alert banner */</span></p>
+<p class="p1"><span class="s1">.alert-banner {</span></p>
+<p class="p1"><span class="s1">width: 100%;</span></p>
+<p class="p1"><span class="s1">max-width: 720px;</span></p>
+<p class="p1"><span class="s1">background: var(–accent2);</span></p>
+<p class="p1"><span class="s1">color: #fff;</span></p>
+<p class="p1"><span class="s1">font-family: ‘Barlow Condensed’, sans-serif;</span></p>
+<p class="p1"><span class="s1">font-weight: 700;</span></p>
+<p class="p1"><span class="s1">font-size: 1.4rem;</span></p>
+<p class="p1"><span class="s1">text-transform: uppercase;</span></p>
+<p class="p1"><span class="s1">letter-spacing: 0.08em;</span></p>
+<p class="p1"><span class="s1">padding: 16px 24px;</span></p>
+<p class="p1"><span class="s1">margin-bottom: 16px;</span></p>
+<p class="p1"><span class="s1">display: flex;</span></p>
+<p class="p1"><span class="s1">align-items: center;</span></p>
+<p class="p1"><span class="s1">gap: 12px;</span></p>
+<p class="p1"><span class="s1">animation: flash-bg 0.8s infinite alternate;</span></p>
+<p class="p1"><span class="s1">}</span></p>
+<p class="p2"><span class="s1"></span><br></p>
+<p class="p1"><span class="s1">@keyframes flash-bg {</span></p>
+<p class="p1"><span class="s1">from { background: var(–accent2); }</span></p>
+<p class="p1"><span class="s1">to { background: #c41a4a; }</span></p>
+<p class="p1"><span class="s1">}</span></p>
+<p class="p2"><span class="s1"></span><br></p>
+<p class="p1"><span class="s1">.alert-banner .alert-icon { font-size: 1.6rem; }</span></p>
+<p class="p1"><span class="s1">.alert-banner .alert-close {</span></p>
+<p class="p1"><span class="s1">margin-left: auto;</span></p>
+<p class="p1"><span class="s1">background: rgba(255,255,255,0.2);</span></p>
+<p class="p1"><span class="s1">color: #fff;</span></p>
+<p class="p1"><span class="s1">border: none;</span></p>
+<p class="p1"><span class="s1">font-size: 1rem;</span></p>
+<p class="p1"><span class="s1">padding: 4px 10px;</span></p>
+<p class="p1"><span class="s1">cursor: pointer;</span></p>
+<p class="p1"><span class="s1">font-family: ‘Space Mono’, monospace;</span></p>
+<p class="p1"><span class="s1">}</span></p>
+<p class="p2"><span class="s1"></span><br></p>
+<p class="p1"><span class="s1">.spinner {</span></p>
+<p class="p1"><span class="s1">display: inline-block;</span></p>
+<p class="p1"><span class="s1">width: 10px; height: 10px;</span></p>
+<p class="p1"><span class="s1">border: 2px solid transparent;</span></p>
+<p class="p1"><span class="s1">border-top-color: var(–accent);</span></p>
+<p class="p1"><span class="s1">border-radius: 50%;</span></p>
+<p class="p1"><span class="s1">animation: spin 0.7s linear infinite;</span></p>
+<p class="p1"><span class="s1">margin-left: 6px;</span></p>
+<p class="p1"><span class="s1">}</span></p>
+<p class="p1"><span class="s1">@keyframes spin { to { transform: rotate(360deg); } }</span></p>
+<p class="p2"><span class="s1"></span><br></p>
+<p class="p1"><span class="s1">.empty-state {</span></p>
+<p class="p1"><span class="s1">padding: 32px 16px;</span></p>
+<p class="p1"><span class="s1">text-align: center;</span></p>
+<p class="p1"><span class="s1">font-family: ‘Space Mono’, monospace;</span></p>
+<p class="p1"><span class="s1">font-size: 0.7rem;</span></p>
+<p class="p1"><span class="s1">color: var(–muted);</span></p>
+<p class="p1"><span class="s1">line-height: 1.8;</span></p>
+<p class="p1"><span class="s1">}</span></p>
+<p class="p2"><span class="s1"></span><br></p>
+<p class="p1"><span class="s1">.progress-bar-wrap {</span></p>
+<p class="p1"><span class="s1">width: 100%;</span></p>
+<p class="p1"><span class="s1">height: 2px;</span></p>
+<p class="p1"><span class="s1">background: var(–border);</span></p>
+<p class="p1"><span class="s1">margin-top: 0;</span></p>
+<p class="p1"><span class="s1">}</span></p>
+<p class="p1"><span class="s1">.progress-bar-fill {</span></p>
+<p class="p1"><span class="s1">height: 100%;</span></p>
+<p class="p1"><span class="s1">background: var(–accent);</span></p>
+<p class="p1"><span class="s1">transition: width 1s linear;</span></p>
+<p class="p1"><span class="s1">}</span></p>
+<p class="p2"><span class="s1"></span><br></p>
+<p class="p1"><span class="s1">.eta-row {</span></p>
+<p class="p1"><span class="s1">display: flex;</span></p>
+<p class="p1"><span class="s1">gap: 24px;</span></p>
+<p class="p1"><span class="s1">padding: 12px 16px;</span></p>
+<p class="p1"><span class="s1">background: rgba(0,229,255,0.03);</span></p>
+<p class="p1"><span class="s1">border-top: 1px solid var(–border);</span></p>
+<p class="p1"><span class="s1">flex-wrap: wrap;</span></p>
+<p class="p1"><span class="s1">}</span></p>
+<p class="p1"><span class="s1">.eta-item { display: flex; flex-direction: column; gap: 2px; }</span></p>
+<p class="p1"><span class="s1">.eta-label { font-family: ‘Space Mono’, monospace; font-size: 0.55rem; color: var(–muted); text-transform: uppercase; letter-spacing: 0.1em; }</span></p>
+<p class="p1"><span class="s1">.eta-value { font-family: ‘Space Mono’, monospace; font-size: 0.9rem; color: var(–accent); }</span></p>
+<p class="p2"><span class="s1"></span><br></p>
+<p class="p1"><span class="s1">.next-check-bar {</span></p>
+<p class="p1"><span class="s1">height: 2px;</span></p>
+<p class="p1"><span class="s1">background: var(–border);</span></p>
+<p class="p1"><span class="s1">width: 100%;</span></p>
+<p class="p1"><span class="s1">margin-top: 8px;</span></p>
+<p class="p1"><span class="s1">}</span></p>
+<p class="p1"><span class="s1">.next-check-fill {</span></p>
+<p class="p1"><span class="s1">height: 100%;</span></p>
+<p class="p1"><span class="s1">background: var(–muted);</span></p>
+<p class="p1"><span class="s1">transition: width 1s linear;</span></p>
+<p class="p1"><span class="s1">}</span></p>
+<p class="p1"><span class="s1">&lt;/style&gt;</span></p>
+<p class="p2"><span class="s1"></span><br></p>
+<p class="p1"><span class="s1">&lt;/head&gt;</span></p>
+<p class="p1"><span class="s1">&lt;body&gt;</span></p>
+<p class="p2"><span class="s1"></span><br></p>
+<p class="p1"><span class="s1">&lt;header&gt;</span></p>
+<p class="p1"><span class="s1">  &lt;div class="header-top"&gt;</span></p>
+<p class="p1"><span class="s1">    &lt;h1&gt;Meet Monitor&lt;/h1&gt;</span></p>
+<p class="p1"><span class="s1">    &lt;span class="status-pill idle" id="statusPill"&gt;Idle&lt;/span&gt;</span></p>
+<p class="p1"><span class="s1">  &lt;/div&gt;</span></p>
+<p class="p1"><span class="s1">  &lt;div class="subtitle"&gt;AthleticLIVE · Girls 4×400 Alert System&lt;/div&gt;</span></p>
+<p class="p1"><span class="s1">&lt;/header&gt;</span></p>
+<p class="p2"><span class="s1"></span><br></p>
+<p class="p1"><span class="s1">&lt;div id="alertBanner" style="display:none" class="alert-banner"&gt;</span></p>
+<p class="p1"><span class="s1">  &lt;span class="alert-icon"&gt;</span><span class="s5">🚨</span><span class="s1">&lt;/span&gt;</span></p>
+<p class="p1"><span class="s1">  &lt;span id="alertText"&gt;ALERT&lt;/span&gt;</span></p>
+<p class="p1"><span class="s1">  &lt;button class="alert-close" onclick="dismissAlert()"&gt;</span><span class="s6">✕</span><span class="s1"> Dismiss&lt;/button&gt;</span></p>
+<p class="p1"><span class="s1">&lt;/div&gt;</span></p>
+<p class="p2"><span class="s1"></span><br></p>
+<p class="p1"><span class="s1">&lt;!-- Config --&gt;</span></p>
+<p class="p2"><span class="s1"></span><br></p>
+<p class="p1"><span class="s1">&lt;div class="main-card"&gt;</span></p>
+<p class="p1"><span class="s1">  &lt;div class="config-row"&gt;</span></p>
+<p class="p1"><span class="s1">    &lt;div class="field-group input-full"&gt;</span></p>
+<p class="p1"><span class="s1">      &lt;label&gt;AthleticLIVE Meet URL&lt;/label&gt;</span></p>
+<p class="p3"><span class="s2">      &lt;input id="meetUrl" type="text" value="<a href="https://live.finallaptiminggroup.com/meets/60830"><span class="s3">https://live.finallaptiminggroup.com/meets/60830</span></a>" placeholder="<a href="https://live.finallaptiminggroup.com/meets/"><span class="s3">https://live.finallaptiminggroup.com/meets/</span></a>..." /&gt;</span></p>
+<p class="p1"><span class="s1">    &lt;/div&gt;</span></p>
+<p class="p1"><span class="s1">    &lt;div class="field-group"&gt;</span></p>
+<p class="p1"><span class="s1">      &lt;label&gt;Target Event (to monitor for)&lt;/label&gt;</span></p>
+<p class="p1"><span class="s1">      &lt;input id="targetEvent" type="text" value="Girls 4x400" /&gt;</span></p>
+<p class="p1"><span class="s1">    &lt;/div&gt;</span></p>
+<p class="p1"><span class="s1">    &lt;div class="field-group"&gt;</span></p>
+<p class="p1"><span class="s1">      &lt;label&gt;Alert me this many events before&lt;/label&gt;</span></p>
+<p class="p1"><span class="s1">      &lt;input id="alertOffset" type="number" value="3" min="1" max="10" /&gt;</span></p>
+<p class="p1"><span class="s1">    &lt;/div&gt;</span></p>
+<p class="p1"><span class="s1">    &lt;div class="field-group"&gt;</span></p>
+<p class="p1"><span class="s1">      &lt;label&gt;Check every (minutes)&lt;/label&gt;</span></p>
+<p class="p1"><span class="s1">      &lt;input id="checkInterval" type="number" value="2" min="1" max="10" /&gt;</span></p>
+<p class="p1"><span class="s1">    &lt;/div&gt;</span></p>
+<p class="p1"><span class="s1">    &lt;div class="field-group"&gt;</span></p>
+<p class="p1"><span class="s1">      &lt;label&gt;Anthropic API Key&lt;/label&gt;</span></p>
+<p class="p1"><span class="s1">      &lt;input id="apiKey" type="password" placeholder="sk-ant-..." /&gt;</span></p>
+<p class="p1"><span class="s1">    &lt;/div&gt;</span></p>
+<p class="p1"><span class="s1">  &lt;/div&gt;</span></p>
+<p class="p1"><span class="s1">  &lt;div class="controls"&gt;</span></p>
+<p class="p1"><span class="s1">    &lt;button class="btn-start" id="btnStart" onclick="startMonitoring()"&gt;</span><span class="s7">▶</span><span class="s1"> Start Monitoring&lt;/button&gt;</span></p>
+<p class="p1"><span class="s1">    &lt;button class="btn-check" id="btnCheck" onclick="checkNow()" disabled&gt;</span><span class="s8">↻</span><span class="s1"> Check Now&lt;/button&gt;</span></p>
+<p class="p1"><span class="s1">    &lt;button class="btn-stop" id="btnStop" onclick="stopMonitoring()" disabled&gt;</span><span class="s7">■</span><span class="s1"> Stop&lt;/button&gt;</span></p>
+<p class="p1"><span class="s1">  &lt;/div&gt;</span></p>
+<p class="p1"><span class="s1">  &lt;div class="next-check-bar" style="margin-top:12px"&gt;</span></p>
+<p class="p1"><span class="s1">    &lt;div class="next-check-fill" id="nextCheckFill" style="width:0%"&gt;&lt;/div&gt;</span></p>
+<p class="p1"><span class="s1">  &lt;/div&gt;</span></p>
+<p class="p1"><span class="s1">  &lt;div style="font-family:'Space Mono',monospace;font-size:0.55rem;color:var(--muted);margin-top:4px;text-align:right" id="nextCheckLabel"&gt;&lt;/div&gt;</span></p>
+<p class="p1"><span class="s1">&lt;/div&gt;</span></p>
+<p class="p2"><span class="s1"></span><br></p>
+<p class="p1"><span class="s1">&lt;!-- Current Event --&gt;</span></p>
+<p class="p2"><span class="s1"></span><br></p>
+<p class="p1"><span class="s1">&lt;div class="current-event-card"&gt;</span></p>
+<p class="p1"><span class="s1">  &lt;div class="card-label"&gt;</span></p>
+<p class="p1"><span class="s1">    &lt;span&gt;Current Live Event&lt;/span&gt;</span></p>
+<p class="p1"><span class="s1">    &lt;span class="live-dot" id="liveDotLabel" style="display:none"&gt;Live&lt;/span&gt;</span></p>
+<p class="p1"><span class="s1">  &lt;/div&gt;</span></p>
+<p class="p1"><span class="s1">  &lt;div class="event-display" id="currentEventDisplay"&gt;</span></p>
+<p class="p1"><span class="s1">    &lt;div class="empty-state"&gt;Not yet monitoring.&lt;br&gt;Enter your API key and press Start.&lt;/div&gt;</span></p>
+<p class="p1"><span class="s1">  &lt;/div&gt;</span></p>
+<p class="p1"><span class="s1">  &lt;div class="eta-row" id="etaRow" style="display:none"&gt;</span></p>
+<p class="p1"><span class="s1">    &lt;div class="eta-item"&gt;</span></p>
+<p class="p1"><span class="s1">      &lt;span class="eta-label"&gt;Events Until Target&lt;/span&gt;</span></p>
+<p class="p1"><span class="s1">      &lt;span class="eta-value" id="etaEvents"&gt;—&lt;/span&gt;</span></p>
+<p class="p1"><span class="s1">    &lt;/div&gt;</span></p>
+<p class="p1"><span class="s1">    &lt;div class="eta-item"&gt;</span></p>
+<p class="p1"><span class="s1">      &lt;span class="eta-label"&gt;Est. Time Until Target&lt;/span&gt;</span></p>
+<p class="p1"><span class="s1">      &lt;span class="eta-value" id="etaTime"&gt;—&lt;/span&gt;</span></p>
+<p class="p1"><span class="s1">    &lt;/div&gt;</span></p>
+<p class="p1"><span class="s1">    &lt;div class="eta-item"&gt;</span></p>
+<p class="p1"><span class="s1">      &lt;span class="eta-label"&gt;Avg Time Per Event&lt;/span&gt;</span></p>
+<p class="p1"><span class="s1">      &lt;span class="eta-value" id="etaAvg"&gt;—&lt;/span&gt;</span></p>
+<p class="p1"><span class="s1">    &lt;/div&gt;</span></p>
+<p class="p1"><span class="s1">    &lt;div class="eta-item"&gt;</span></p>
+<p class="p1"><span class="s1">      &lt;span class="eta-label"&gt;Est. Start Time&lt;/span&gt;</span></p>
+<p class="p1"><span class="s1">      &lt;span class="eta-value" id="etaStart"&gt;—&lt;/span&gt;</span></p>
+<p class="p1"><span class="s1">    &lt;/div&gt;</span></p>
+<p class="p1"><span class="s1">  &lt;/div&gt;</span></p>
+<p class="p1"><span class="s1">&lt;/div&gt;</span></p>
+<p class="p2"><span class="s1"></span><br></p>
+<p class="p1"><span class="s1">&lt;!-- Events list --&gt;</span></p>
+<p class="p2"><span class="s1"></span><br></p>
+<p class="p1"><span class="s1">&lt;div class="events-card"&gt;</span></p>
+<p class="p1"><span class="s1">  &lt;div class="card-label"&gt;</span></p>
+<p class="p1"><span class="s1">    &lt;span&gt;Event Schedule&lt;/span&gt;</span></p>
+<p class="p1"><span class="s1">    &lt;span id="eventsCountLabel" style="color:var(--muted)"&gt;—&lt;/span&gt;</span></p>
+<p class="p1"><span class="s1">  &lt;/div&gt;</span></p>
+<p class="p1"><span class="s1">  &lt;div class="events-list" id="eventsList"&gt;</span></p>
+<p class="p1"><span class="s1">    &lt;div class="empty-state"&gt;Event schedule will appear after first check.&lt;/div&gt;</span></p>
+<p class="p1"><span class="s1">  &lt;/div&gt;</span></p>
+<p class="p1"><span class="s1">&lt;/div&gt;</span></p>
+<p class="p2"><span class="s1"></span><br></p>
+<p class="p1"><span class="s1">&lt;!-- Log --&gt;</span></p>
+<p class="p2"><span class="s1"></span><br></p>
+<p class="p1"><span class="s1">&lt;div class="log-card"&gt;</span></p>
+<p class="p1"><span class="s1">  &lt;div class="card-label"&gt;Activity Log&lt;/div&gt;</span></p>
+<p class="p1"><span class="s1">  &lt;div class="log-entries" id="logEntries"&gt;</span></p>
+<p class="p1"><span class="s1">    &lt;div class="log-entry"&gt;&lt;span class="log-time"&gt;--:--:--&lt;/span&gt;&lt;span class="log-msg"&gt;Ready. Configure and press Start.&lt;/span&gt;&lt;/div&gt;</span></p>
+<p class="p1"><span class="s1">  &lt;/div&gt;</span></p>
+<p class="p1"><span class="s1">&lt;/div&gt;</span></p>
+<p class="p2"><span class="s1"></span><br></p>
+<p class="p1"><span class="s1">&lt;script&gt;</span></p>
+<p class="p1"><span class="s1">let monitorInterval = null;</span></p>
+<p class="p1"><span class="s1">let nextCheckTimer = null;</span></p>
+<p class="p1"><span class="s1">let isChecking = false;</span></p>
+<p class="p1"><span class="s1">let state = {</span></p>
+<p class="p1"><span class="s1">  events: [],</span></p>
+<p class="p1"><span class="s1">  currentLiveIndex: -1,</span></p>
+<p class="p1"><span class="s1">  targetIndex: -1,</span></p>
+<p class="p1"><span class="s1">  alertFired: false,</span></p>
+<p class="p1"><span class="s1">  lastCheckTime: null,</span></p>
+<p class="p1"><span class="s1">  avgEventDuration: null, // minutes</span></p>
+<p class="p1"><span class="s1">  eventTimestamps: [], // {index, time}</span></p>
+<p class="p1"><span class="s1">};</span></p>
+<p class="p2"><span class="s1"></span><br></p>
+<p class="p1"><span class="s1">function log(msg, type = '') {</span></p>
+<p class="p1"><span class="s1">  const now = new Date();</span></p>
+<p class="p1"><span class="s1">  const t = now.toTimeString().slice(0,8);</span></p>
+<p class="p1"><span class="s1">  const el = document.createElement('div');</span></p>
+<p class="p1"><span class="s1">  el.className = 'log-entry';</span></p>
+<p class="p1"><span class="s1">  el.innerHTML = `&lt;span class="log-time"&gt;${t}&lt;/span&gt;&lt;span class="log-msg ${type}"&gt;${msg}&lt;/span&gt;`;</span></p>
+<p class="p1"><span class="s1">  const container = document.getElementById('logEntries');</span></p>
+<p class="p1"><span class="s1">  container.appendChild(el);</span></p>
+<p class="p1"><span class="s1">  container.scrollTop = container.scrollHeight;</span></p>
+<p class="p1"><span class="s1">}</span></p>
+<p class="p2"><span class="s1"></span><br></p>
+<p class="p1"><span class="s1">function setStatus(s) {</span></p>
+<p class="p1"><span class="s1">  const pill = document.getElementById('statusPill');</span></p>
+<p class="p1"><span class="s1">  pill.className = 'status-pill ' + s;</span></p>
+<p class="p1"><span class="s1">  const labels = { idle: 'Idle', monitoring: 'Monitoring', alerted: 'Alert!' };</span></p>
+<p class="p1"><span class="s1">  pill.textContent = labels[s] || s;</span></p>
+<p class="p1"><span class="s1">}</span></p>
+<p class="p2"><span class="s1"></span><br></p>
+<p class="p1"><span class="s1">function dismissAlert() {</span></p>
+<p class="p1"><span class="s1">  document.getElementById('alertBanner').style.display = 'none';</span></p>
+<p class="p1"><span class="s1">}</span></p>
+<p class="p2"><span class="s1"></span><br></p>
+<p class="p1"><span class="s1">function showAlert(msg) {</span></p>
+<p class="p1"><span class="s1">  const el = document.getElementById('alertBanner');</span></p>
+<p class="p1"><span class="s1">  document.getElementById('alertText').textContent = msg;</span></p>
+<p class="p1"><span class="s1">  el.style.display = 'flex';</span></p>
+<p class="p1"><span class="s1">  setStatus('alerted');</span></p>
+<p class="p1"><span class="s1">  // Try browser notification</span></p>
+<p class="p1"><span class="s1">  if ('Notification' in window &amp;&amp; Notification.permission === 'granted') {</span></p>
+<p class="p1"><span class="s1">    new Notification('Meet Monitor Alert', { body: msg, icon: '' });</span></p>
+<p class="p1"><span class="s1">  }</span></p>
+<p class="p1"><span class="s1">  log('</span><span class="s5">🚨</span><span class="s1"> ' + msg, 'alert');</span></p>
+<p class="p1"><span class="s1">}</span></p>
+<p class="p2"><span class="s1"></span><br></p>
+<p class="p1"><span class="s1">async function callClaude(prompt, apiKey) {</span></p>
+<p class="p1"><span class="s1">  const makeReq = (messages) =&gt; fetch('<a href="https://api.anthropic.com/v1/messages"><span class="s4">https://api.anthropic.com/v1/messages</span></a>', {</span></p>
+<p class="p1"><span class="s1">    method: 'POST',</span></p>
+<p class="p1"><span class="s1">    headers: {</span></p>
+<p class="p1"><span class="s1">      'Content-Type': 'application/json',</span></p>
+<p class="p1"><span class="s1">      'x-api-key': apiKey,</span></p>
+<p class="p1"><span class="s1">      'anthropic-version': '2023-06-01',</span></p>
+<p class="p1"><span class="s1">      'anthropic-dangerous-direct-browser-access': 'true'</span></p>
+<p class="p1"><span class="s1">    },</span></p>
+<p class="p1"><span class="s1">    body: JSON.stringify({</span></p>
+<p class="p1"><span class="s1">      model: 'claude-haiku-4-5-20251001',</span></p>
+<p class="p1"><span class="s1">      max_tokens: 2000,</span></p>
+<p class="p1"><span class="s1">      tools: [{ type: 'web_search_20250305', name: 'web_search' }],</span></p>
+<p class="p1"><span class="s1">      messages</span></p>
+<p class="p1"><span class="s1">    })</span></p>
+<p class="p1"><span class="s1">  });</span></p>
+<p class="p2"><span class="s1"></span><br></p>
+<p class="p1"><span class="s1">  let messages = [{ role: 'user', content: prompt }];</span></p>
+<p class="p2"><span class="s1"></span><br></p>
+<p class="p1"><span class="s1">  // Agentic loop - follow tool_use until we get end_turn with text</span></p>
+<p class="p1"><span class="s1">  for (let i = 0; i &lt; 5; i++) {</span></p>
+<p class="p1"><span class="s1">    const resp = await makeReq(messages);</span></p>
+<p class="p1"><span class="s1">    const data = await resp.json();</span></p>
+<p class="p1"><span class="s1">    const blockTypes = (data.content||[]).map(b=&gt;b.type).join(', ');</span></p>
+<p class="p1"><span class="s1">    log(`Turn ${i+1}: HTTP ${resp.status} | stop: ${data.stop_reason} | blocks: ${blockTypes}`, '');</span></p>
+<p class="p2"><span class="s1"></span><br></p>
+<p class="p1"><span class="s1">    if (!resp.ok) {</span></p>
+<p class="p1"><span class="s1">      throw new Error(`API ${resp.status}: ${data.error?.message || JSON.stringify(data).slice(0,200)}`);</span></p>
+<p class="p1"><span class="s1">    }</span></p>
+<p class="p2"><span class="s1"></span><br></p>
+<p class="p1"><span class="s1">    // Collect any text blocks</span></p>
+<p class="p1"><span class="s1">    const textBlocks = (data.content||[]).filter(b =&gt; b.type === 'text');</span></p>
+<p class="p1"><span class="s1">    if (textBlocks.length &gt; 0) {</span></p>
+<p class="p1"><span class="s1">      return textBlocks.map(b =&gt; b.text).join('\n');</span></p>
+<p class="p1"><span class="s1">    }</span></p>
+<p class="p2"><span class="s1"></span><br></p>
+<p class="p1"><span class="s1">    if (data.stop_reason === 'tool_use') {</span></p>
+<p class="p1"><span class="s1">      // Add assistant message, then tool results</span></p>
+<p class="p1"><span class="s1">      messages.push({ role: 'assistant', content: data.content });</span></p>
+<p class="p1"><span class="s1">      const toolResults = (data.content||[])</span></p>
+<p class="p1"><span class="s1">        .filter(b =&gt; b.type === 'tool_use')</span></p>
+<p class="p1"><span class="s1">        .map(tb =&gt; ({ type: 'tool_result', tool_use_id: <a href="http://tb.id/"><span class="s4">tb.id</span></a>, content: '' }));</span></p>
+<p class="p1"><span class="s1">      messages.push({ role: 'user', content: toolResults });</span></p>
+<p class="p1"><span class="s1">      continue;</span></p>
+<p class="p1"><span class="s1">    }</span></p>
+<p class="p2"><span class="s1"></span><br></p>
+<p class="p1"><span class="s1">    throw new Error(`Unexpected stop_reason: ${data.stop_reason}. Blocks: ${blockTypes}`);</span></p>
+<p class="p1"><span class="s1">  }</span></p>
+<p class="p2"><span class="s1"></span><br></p>
+<p class="p1"><span class="s1">  throw new Error('Max turns reached without text response');</span></p>
+<p class="p1"><span class="s1">}</span></p>
+<p class="p2"><span class="s1"></span><br></p>
+<p class="p1"><span class="s1">async function fetchMeetData(url, apiKey) {</span></p>
+<p class="p1"><span class="s1">  const target = document.getElementById('targetEvent').value.trim();</span></p>
+<p class="p1"><span class="s1">  const prompt = `Search the web for the current status of this track &amp; field meet: ${url}</span></p>
+<p class="p2"><span class="s1"></span><br></p>
+<p class="p1"><span class="s1">Visit the page and find the full event schedule. Look for:</span></p>
+<p class="p1"><span class="s1">1. A list of all events with their order/numbers</span></p>
+<p class="p1"><span class="s1">2. Which event has a "Live" indicator (currently happening)</span></p>
+<p class="p1"><span class="s1">3. Which events are completed vs upcoming</span></p>
+<p class="p2"><span class="s1"></span><br></p>
+<p class="p1"><span class="s1">Then respond with ONLY a JSON code block (no explanation), like this:</span></p>
+<p class="p1"><span class="s1">\`\`\`json</span></p>
+<p class="p1"><span class="s1">{</span></p>
+<p class="p1"><span class="s1">  "events": [</span></p>
+<p class="p1"><span class="s1">    { "number": 1, "name": "Boys 100m Dash", "status": "done" },</span></p>
+<p class="p1"><span class="s1">    { "number": 2, "name": "Girls 100m Dash", "status": "live" },</span></p>
+<p class="p1"><span class="s1">    { "number": 3, "name": "Boys 200m Dash", "status": "upcoming" }</span></p>
+<p class="p1"><span class="s1">  ],</span></p>
+<p class="p1"><span class="s1">  "liveEvent": "Girls 100m Dash",</span></p>
+<p class="p1"><span class="s1">  "liveIndex": 1</span></p>
+<p class="p1"><span class="s1">}</span></p>
+<p class="p1"><span class="s1">\`\`\`</span></p>
+<p class="p2"><span class="s1"></span><br></p>
+<p class="p1"><span class="s1">Status must be exactly: "done", "live", or "upcoming".</span></p>
+<p class="p1"><span class="s1">liveIndex is the 0-based array index of the live event.</span></p>
+<p class="p1"><span class="s1">The target event I care about is: "${target}" — make sure it appears in the list if it's on the schedule.</span></p>
+<p class="p1"><span class="s1">If you cannot load the page or find events, return: \`\`\`json\n{"events":[],"liveEvent":null,"liveIndex":-1}\`\`\``;</span></p>
+<p class="p2"><span class="s1"></span><br></p>
+<p class="p1"><span class="s1">  const raw = await callClaude(prompt, apiKey);</span></p>
+<p class="p1"><span class="s1">  log(`Raw response (first 200 chars): ${raw.slice(0,200)}`, '');</span></p>
+<p class="p2"><span class="s1"></span><br></p>
+<p class="p1"><span class="s1">  // Try extracting JSON from code block first, then bare JSON</span></p>
+<p class="p1"><span class="s1">  let jsonStr = null;</span></p>
+<p class="p1"><span class="s1">  const codeBlock = raw.match(/```json\s*([\s\S]*?)```/);</span></p>
+<p class="p1"><span class="s1">  if (codeBlock) {</span></p>
+<p class="p1"><span class="s1">    jsonStr = codeBlock[1].trim();</span></p>
+<p class="p1"><span class="s1">  } else {</span></p>
+<p class="p1"><span class="s1">    // Fall back to finding outermost { ... }</span></p>
+<p class="p1"><span class="s1">    const bare = raw.match(/\{[\s\S]*\}/);</span></p>
+<p class="p1"><span class="s1">    if (bare) jsonStr = bare[0];</span></p>
+<p class="p1"><span class="s1">  }</span></p>
+<p class="p2"><span class="s1"></span><br></p>
+<p class="p1"><span class="s1">  if (!jsonStr) throw new Error(`Could not find JSON in response. Raw: ${raw.slice(0,300)}`);</span></p>
+<p class="p2"><span class="s1"></span><br></p>
+<p class="p1"><span class="s1">  try {</span></p>
+<p class="p1"><span class="s1">    return JSON.parse(jsonStr);</span></p>
+<p class="p1"><span class="s1">  } catch(e) {</span></p>
+<p class="p1"><span class="s1">    throw new Error(`JSON parse failed: ${e.message}. Raw JSON: ${jsonStr.slice(0,200)}`);</span></p>
+<p class="p1"><span class="s1">  }</span></p>
+<p class="p1"><span class="s1">}</span></p>
+<p class="p2"><span class="s1"></span><br></p>
+<p class="p1"><span class="s1">function updateUI(data) {</span></p>
+<p class="p1"><span class="s1">  const target = document.getElementById('targetEvent').value.trim().toLowerCase();</span></p>
+<p class="p1"><span class="s1">  const alertOffset = parseInt(document.getElementById('alertOffset').value) || 3;</span></p>
+<p class="p2"><span class="s1"></span><br></p>
+<p class="p1"><span class="s1">  state.events = data.events || [];</span></p>
+<p class="p1"><span class="s1">  state.currentLiveIndex = data.liveIndex ?? -1;</span></p>
+<p class="p1"><span class="s1">  state.targetIndex = state.events.findIndex(e =&gt; e.name.toLowerCase().includes(target));</span></p>
+<p class="p2"><span class="s1"></span><br></p>
+<p class="p1"><span class="s1">  // Track timestamps for avg estimation</span></p>
+<p class="p1"><span class="s1">  if (state.currentLiveIndex &gt;= 0) {</span></p>
+<p class="p1"><span class="s1">    const now = Date.now();</span></p>
+<p class="p1"><span class="s1">    const existing = state.eventTimestamps.find(t =&gt; t.index === state.currentLiveIndex);</span></p>
+<p class="p1"><span class="s1">    if (!existing) {</span></p>
+<p class="p1"><span class="s1">      state.eventTimestamps.push({ index: state.currentLiveIndex, time: now });</span></p>
+<p class="p1"><span class="s1">      // Compute avg from last few transitions</span></p>
+<p class="p1"><span class="s1">      if (state.eventTimestamps.length &gt;= 2) {</span></p>
+<p class="p1"><span class="s1">        const sorted = [...state.eventTimestamps].sort((a,b) =&gt; a.index - b.index);</span></p>
+<p class="p1"><span class="s1">        const diffs = [];</span></p>
+<p class="p1"><span class="s1">        for (let i = 1; i &lt; sorted.length; i++) {</span></p>
+<p class="p1"><span class="s1">          const dt = (sorted[i].time - sorted[i-1].time) / 60000;</span></p>
+<p class="p1"><span class="s1">          const di = sorted[i].index - sorted[i-1].index;</span></p>
+<p class="p1"><span class="s1">          if (di &gt; 0) diffs.push(dt / di);</span></p>
+<p class="p1"><span class="s1">        }</span></p>
+<p class="p1"><span class="s1">        if (diffs.length) state.avgEventDuration = diffs.reduce((a,b)=&gt;a+b,0)/diffs.length;</span></p>
+<p class="p1"><span class="s1">      }</span></p>
+<p class="p1"><span class="s1">    }</span></p>
+<p class="p1"><span class="s1">  }</span></p>
+<p class="p2"><span class="s1"></span><br></p>
+<p class="p1"><span class="s1">  // Update current event display</span></p>
+<p class="p1"><span class="s1">  const liveEvent = state.events[state.currentLiveIndex];</span></p>
+<p class="p1"><span class="s1">  const display = document.getElementById('currentEventDisplay');</span></p>
+<p class="p1"><span class="s1">  document.getElementById('liveDotLabel').style.display = liveEvent ? 'flex' : 'none';</span></p>
+<p class="p2"><span class="s1"></span><br></p>
+<p class="p1"><span class="s1">  if (liveEvent) {</span></p>
+<p class="p1"><span class="s1">    display.innerHTML = `</span></p>
+<p class="p1"><span class="s1">      &lt;div class="event-number"&gt;#${state.currentLiveIndex + 1}&lt;/div&gt;</span></p>
+<p class="p1"><span class="s1">      &lt;div&gt;</span></p>
+<p class="p1"><span class="s1">        &lt;div class="event-name"&gt;${liveEvent.name}&lt;/div&gt;</span></p>
+<p class="p1"><span class="s1">        &lt;div class="event-meta"&gt;Event ${liveEvent.number ?? state.currentLiveIndex + 1} of ${state.events.length}&lt;/div&gt;</span></p>
+<p class="p1"><span class="s1">      &lt;/div&gt;`;</span></p>
+<p class="p1"><span class="s1">  } else {</span></p>
+<p class="p1"><span class="s1">    display.innerHTML = `&lt;div class="empty-state"&gt;Could not identify live event.&lt;br&gt;Will retry on next check.&lt;/div&gt;`;</span></p>
+<p class="p1"><span class="s1">  }</span></p>
+<p class="p2"><span class="s1"></span><br></p>
+<p class="p1"><span class="s1">  // ETA</span></p>
+<p class="p1"><span class="s1">  const etaRow = document.getElementById('etaRow');</span></p>
+<p class="p1"><span class="s1">  if (state.targetIndex &gt;= 0 &amp;&amp; state.currentLiveIndex &gt;= 0) {</span></p>
+<p class="p1"><span class="s1">    const eventsLeft = state.targetIndex - state.currentLiveIndex;</span></p>
+<p class="p1"><span class="s1">    document.getElementById('etaEvents').textContent = eventsLeft &gt; 0 ? `${eventsLeft} event${eventsLeft !== 1 ? 's' : ''}` : eventsLeft === 0 ? 'NOW' : 'Passed';</span></p>
+<p class="p1"><span class="s1">    if (state.avgEventDuration &amp;&amp; eventsLeft &gt; 0) {</span></p>
+<p class="p1"><span class="s1">      const mins = Math.round(state.avgEventDuration * eventsLeft);</span></p>
+<p class="p1"><span class="s1">      document.getElementById('etaTime').textContent = `~${mins} min`;</span></p>
+<p class="p1"><span class="s1">      document.getElementById('etaAvg').textContent = `~${Math.round(state.avgEventDuration)} min/event`;</span></p>
+<p class="p1"><span class="s1">      const startTime = new Date(Date.now() + mins * 60000);</span></p>
+<p class="p1"><span class="s1">      document.getElementById('etaStart').textContent = startTime.toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'});</span></p>
+<p class="p1"><span class="s1">    } else {</span></p>
+<p class="p1"><span class="s1">      document.getElementById('etaTime').textContent = 'Estimating…';</span></p>
+<p class="p1"><span class="s1">      document.getElementById('etaAvg').textContent = 'Estimating…';</span></p>
+<p class="p1"><span class="s1">      document.getElementById('etaStart').textContent = '—';</span></p>
+<p class="p1"><span class="s1">    }</span></p>
+<p class="p1"><span class="s1">    etaRow.style.display = 'flex';</span></p>
+<p class="p1"><span class="s1">  } else {</span></p>
+<p class="p1"><span class="s1">    etaRow.style.display = 'none';</span></p>
+<p class="p1"><span class="s1">  }</span></p>
+<p class="p2"><span class="s1"></span><br></p>
+<p class="p1"><span class="s1">  // Events list</span></p>
+<p class="p1"><span class="s1">  const list = document.getElementById('eventsList');</span></p>
+<p class="p1"><span class="s1">  if (state.events.length === 0) {</span></p>
+<p class="p1"><span class="s1">    list.innerHTML = '&lt;div class="empty-state"&gt;No events found. The meet may not have started or the page couldn\'t be read.&lt;/div&gt;';</span></p>
+<p class="p1"><span class="s1">  } else {</span></p>
+<p class="p1"><span class="s1">    document.getElementById('eventsCountLabel').textContent = `${state.events.length} events`;</span></p>
+<p class="p1"><span class="s1">    list.innerHTML = state.events.map((ev, i) =&gt; {</span></p>
+<p class="p1"><span class="s1">      const isLive = i === state.currentLiveIndex;</span></p>
+<p class="p1"><span class="s1">      const isTarget = i === state.targetIndex;</span></p>
+<p class="p1"><span class="s1">      const isDone = ev.status === 'done' &amp;&amp; !isLive;</span></p>
+<p class="p1"><span class="s1">      const eventsFromLive = i - state.currentLiveIndex;</span></p>
+<p class="p1"><span class="s1">      const isSoon = !isLive &amp;&amp; !isTarget &amp;&amp; !isDone &amp;&amp; eventsFromLive &gt; 0 &amp;&amp; eventsFromLive &lt;= alertOffset;</span></p>
+<p class="p2"><span class="s1"></span><br></p>
+<p class="p1"><span class="s1">      let cls = '';</span></p>
+<p class="p1"><span class="s1">      if (isLive) cls = 'is-live';</span></p>
+<p class="p1"><span class="s1">      else if (isTarget) cls = 'is-target';</span></p>
+<p class="p1"><span class="s1">      else if (isSoon) cls = 'is-warn';</span></p>
+<p class="p1"><span class="s1">      else if (isDone) cls = 'is-done';</span></p>
+<p class="p2"><span class="s1"></span><br></p>
+<p class="p1"><span class="s1">      let badge = '';</span></p>
+<p class="p1"><span class="s1">      if (isLive) badge = '&lt;span class="ev-badge badge-live"&gt;Live&lt;/span&gt;';</span></p>
+<p class="p1"><span class="s1">      else if (isTarget) badge = '&lt;span class="ev-badge badge-target"&gt;Target&lt;/span&gt;';</span></p>
+<p class="p1"><span class="s1">      else if (isSoon) badge = '&lt;span class="ev-badge badge-soon"&gt;Soon&lt;/span&gt;';</span></p>
+<p class="p1"><span class="s1">      else if (isDone) badge = '&lt;span class="ev-badge badge-done"&gt;Done&lt;/span&gt;';</span></p>
+<p class="p2"><span class="s1"></span><br></p>
+<p class="p1"><span class="s1">      let eta = '';</span></p>
+<p class="p1"><span class="s1">      if (!isDone &amp;&amp; !isLive &amp;&amp; state.currentLiveIndex &gt;= 0 &amp;&amp; eventsFromLive &gt; 0 &amp;&amp; state.avgEventDuration) {</span></p>
+<p class="p1"><span class="s1">        const m = Math.round(state.avgEventDuration * eventsFromLive);</span></p>
+<p class="p1"><span class="s1">        eta = `~${m}m`;</span></p>
+<p class="p1"><span class="s1">      }</span></p>
+<p class="p2"><span class="s1"></span><br></p>
+<p class="p1"><span class="s1">      return `&lt;div class="event-row ${cls}"&gt;</span></p>
+<p class="p1"><span class="s1">        &lt;span class="ev-num"&gt;${ev.number ?? i+1}&lt;/span&gt;</span></p>
+<p class="p1"><span class="s1">        ${badge}</span></p>
+<p class="p1"><span class="s1">        &lt;span class="ev-name"&gt;${ev.name}&lt;/span&gt;</span></p>
+<p class="p1"><span class="s1">        &lt;span class="ev-est"&gt;${eta}&lt;/span&gt;</span></p>
+<p class="p1"><span class="s1">      &lt;/div&gt;`;</span></p>
+<p class="p1"><span class="s1">    }).join('');</span></p>
+<p class="p2"><span class="s1"></span><br></p>
+<p class="p1"><span class="s1">    // Scroll live event into view</span></p>
+<p class="p1"><span class="s1">    setTimeout(() =&gt; {</span></p>
+<p class="p1"><span class="s1">      const liveRow = list.querySelectorAll('.event-row')[state.currentLiveIndex];</span></p>
+<p class="p1"><span class="s1">      if (liveRow) liveRow.scrollIntoView({ behavior: 'smooth', block: 'center' });</span></p>
+<p class="p1"><span class="s1">    }, 100);</span></p>
+<p class="p1"><span class="s1">  }</span></p>
+<p class="p2"><span class="s1"></span><br></p>
+<p class="p1"><span class="s1">  // Check alert condition</span></p>
+<p class="p1"><span class="s1">  if (!state.alertFired &amp;&amp; state.targetIndex &gt;= 0 &amp;&amp; state.currentLiveIndex &gt;= 0) {</span></p>
+<p class="p1"><span class="s1">    const eventsLeft = state.targetIndex - state.currentLiveIndex;</span></p>
+<p class="p1"><span class="s1">    if (eventsLeft &lt;= alertOffset &amp;&amp; eventsLeft &gt; 0) {</span></p>
+<p class="p1"><span class="s1">      showAlert(`</span><span class="s5">⚡</span><span class="s1"> ${alertOffset} events until ${document.getElementById('targetEvent').value}! Get ready!`);</span></p>
+<p class="p1"><span class="s1">      state.alertFired = true;</span></p>
+<p class="p1"><span class="s1">    } else if (eventsLeft &lt;= 0) {</span></p>
+<p class="p1"><span class="s1">      showAlert(`</span><span class="s5">🏃</span><span class="s1"> ${document.getElementById('targetEvent').value} is happening NOW or next!`);</span></p>
+<p class="p1"><span class="s1">      state.alertFired = true;</span></p>
+<p class="p1"><span class="s1">    }</span></p>
+<p class="p1"><span class="s1">  }</span></p>
+<p class="p1"><span class="s1">}</span></p>
+<p class="p2"><span class="s1"></span><br></p>
+<p class="p1"><span class="s1">let nextCheckCountdown = 0;</span></p>
+<p class="p1"><span class="s1">let countdownTick = null;</span></p>
+<p class="p2"><span class="s1"></span><br></p>
+<p class="p1"><span class="s1">function startCountdown(seconds) {</span></p>
+<p class="p1"><span class="s1">  clearInterval(countdownTick);</span></p>
+<p class="p1"><span class="s1">  nextCheckCountdown = seconds;</span></p>
+<p class="p1"><span class="s1">  const label = document.getElementById('nextCheckLabel');</span></p>
+<p class="p1"><span class="s1">  const fill = document.getElementById('nextCheckFill');</span></p>
+<p class="p2"><span class="s1"></span><br></p>
+<p class="p1"><span class="s1">  function tick() {</span></p>
+<p class="p1"><span class="s1">    nextCheckCountdown--;</span></p>
+<p class="p1"><span class="s1">    const pct = ((seconds - nextCheckCountdown) / seconds) * 100;</span></p>
+<p class="p1"><span class="s1">    fill.style.width = pct + '%';</span></p>
+<p class="p1"><span class="s1">    if (nextCheckCountdown &lt;= 0) {</span></p>
+<p class="p1"><span class="s1">      label.textContent = 'Checking now…';</span></p>
+<p class="p1"><span class="s1">      clearInterval(countdownTick);</span></p>
+<p class="p1"><span class="s1">    } else {</span></p>
+<p class="p1"><span class="s1">      label.textContent = `Next check in ${nextCheckCountdown}s`;</span></p>
+<p class="p1"><span class="s1">    }</span></p>
+<p class="p1"><span class="s1">  }</span></p>
+<p class="p1"><span class="s1">  label.textContent = `Next check in ${seconds}s`;</span></p>
+<p class="p1"><span class="s1">  fill.style.width = '0%';</span></p>
+<p class="p1"><span class="s1">  countdownTick = setInterval(tick, 1000);</span></p>
+<p class="p1"><span class="s1">}</span></p>
+<p class="p2"><span class="s1"></span><br></p>
+<p class="p1"><span class="s1">async function doCheck() {</span></p>
+<p class="p1"><span class="s1">  if (isChecking) return;</span></p>
+<p class="p1"><span class="s1">  isChecking = true;</span></p>
+<p class="p2"><span class="s1"></span><br></p>
+<p class="p1"><span class="s1">  const apiKey = document.getElementById('apiKey').value.trim();</span></p>
+<p class="p1"><span class="s1">  const url = document.getElementById('meetUrl').value.trim();</span></p>
+<p class="p2"><span class="s1"></span><br></p>
+<p class="p1"><span class="s1">  document.getElementById('btnCheck').innerHTML = '</span><span class="s8">↻</span><span class="s1"> Checking&lt;span class="spinner"&gt;&lt;/span&gt;';</span></p>
+<p class="p2"><span class="s1"></span><br></p>
+<p class="p1"><span class="s1">  try {</span></p>
+<p class="p1"><span class="s1">    log(`Starting check... API key length: ${apiKey.length}`, 'info');</span></p>
+<p class="p2"><span class="s1"></span><br></p>
+<p class="p1"><span class="s1">    // Step 1: Raw fetch test</span></p>
+<p class="p1"><span class="s1">    log('Step 1: Sending API request...', 'info');</span></p>
+<p class="p1"><span class="s1">    let rawResp, rawData;</span></p>
+<p class="p1"><span class="s1">    try {</span></p>
+<p class="p3"><span class="s2">      rawResp = await fetch('<a href="https://api.anthropic.com/v1/messages"><span class="s3">https://api.anthropic.com/v1/messages</span></a>', {</span></p>
+<p class="p1"><span class="s1">        method: 'POST',</span></p>
+<p class="p1"><span class="s1">        headers: {</span></p>
+<p class="p1"><span class="s1">          'Content-Type': 'application/json',</span></p>
+<p class="p1"><span class="s1">          'x-api-key': apiKey,</span></p>
+<p class="p1"><span class="s1">          'anthropic-version': '2023-06-01',</span></p>
+<p class="p1"><span class="s1">          'anthropic-dangerous-direct-browser-access': 'true'</span></p>
+<p class="p1"><span class="s1">        },</span></p>
+<p class="p1"><span class="s1">        body: JSON.stringify({</span></p>
+<p class="p1"><span class="s1">          model: 'claude-haiku-4-5-20251001',</span></p>
+<p class="p1"><span class="s1">          max_tokens: 100,</span></p>
+<p class="p1"><span class="s1">          messages: [{ role: 'user', content: 'Say the word READY and nothing else.' }]</span></p>
+<p class="p1"><span class="s1">        })</span></p>
+<p class="p1"><span class="s1">      });</span></p>
+<p class="p1"><span class="s1">      log(`Step 1 response: HTTP ${rawResp.status}`, rawResp.ok ? 'success' : 'error');</span></p>
+<p class="p1"><span class="s1">      rawData = await rawResp.json();</span></p>
+<p class="p1"><span class="s1">      log(`Step 1 body: ${JSON.stringify(rawData).slice(0,300)}`, rawResp.ok ? '' : 'error');</span></p>
+<p class="p1"><span class="s1">    } catch(e) {</span></p>
+<p class="p1"><span class="s1">      log(`Step 1 FAILED (network/CORS?): ${e.message}`, 'error');</span></p>
+<p class="p1"><span class="s1">      return;</span></p>
+<p class="p1"><span class="s1">    }</span></p>
+<p class="p2"><span class="s1"></span><br></p>
+<p class="p1"><span class="s1">    if (!rawResp.ok) {</span></p>
+<p class="p1"><span class="s1">      log(`API rejected request. Not proceeding.`, 'error');</span></p>
+<p class="p1"><span class="s1">      return;</span></p>
+<p class="p1"><span class="s1">    }</span></p>
+<p class="p2"><span class="s1"></span><br></p>
+<p class="p1"><span class="s1">    log('Step 1 passed! Now fetching meet data...', 'success');</span></p>
+<p class="p1"><span class="s1">    const data = await fetchMeetData(url, apiKey);</span></p>
+<p class="p1"><span class="s1">    state.lastCheckTime = new Date();</span></p>
+<p class="p2"><span class="s1"></span><br></p>
+<p class="p1"><span class="s1">    if (data.events.length &gt; 0) {</span></p>
+<p class="p1"><span class="s1">      log(`Got ${data.events.length} events. Live: ${data.liveEvent || 'unknown'}`, 'success');</span></p>
+<p class="p1"><span class="s1">    } else {</span></p>
+<p class="p1"><span class="s1">      log('No events returned. Page may be loading slowly.', 'warn');</span></p>
+<p class="p1"><span class="s1">    }</span></p>
+<p class="p2"><span class="s1"></span><br></p>
+<p class="p1"><span class="s1">    updateUI(data);</span></p>
+<p class="p1"><span class="s1">  } catch (e) {</span></p>
+<p class="p1"><span class="s1">    log(`Error: ${e.message}`, 'error');</span></p>
+<p class="p1"><span class="s1">    log(`Stack: ${e.stack ? e.stack.slice(0,200) : 'none'}`, 'error');</span></p>
+<p class="p1"><span class="s1">  } finally {</span></p>
+<p class="p1"><span class="s1">    isChecking = false;</span></p>
+<p class="p1"><span class="s1">    document.getElementById('btnCheck').textContent = '</span><span class="s8">↻</span><span class="s1"> Check Now';</span></p>
+<p class="p1"><span class="s1">  }</span></p>
+<p class="p1"><span class="s1">}</span></p>
+<p class="p2"><span class="s1"></span><br></p>
+<p class="p1"><span class="s1">async function checkNow() {</span></p>
+<p class="p1"><span class="s1">  await doCheck();</span></p>
+<p class="p1"><span class="s1">  // Restart countdown</span></p>
+<p class="p1"><span class="s1">  if (monitorInterval) {</span></p>
+<p class="p1"><span class="s1">    clearInterval(monitorInterval);</span></p>
+<p class="p1"><span class="s1">    const mins = parseFloat(document.getElementById('checkInterval').value) || 2;</span></p>
+<p class="p1"><span class="s1">    startCountdown(mins * 60);</span></p>
+<p class="p1"><span class="s1">    monitorInterval = setInterval(async () =&gt; {</span></p>
+<p class="p1"><span class="s1">      await doCheck();</span></p>
+<p class="p1"><span class="s1">      startCountdown(mins * 60);</span></p>
+<p class="p1"><span class="s1">    }, mins * 60 * 1000);</span></p>
+<p class="p1"><span class="s1">  }</span></p>
+<p class="p1"><span class="s1">}</span></p>
+<p class="p2"><span class="s1"></span><br></p>
+<p class="p1"><span class="s1">async function startMonitoring() {</span></p>
+<p class="p1"><span class="s1">  const apiKey = document.getElementById('apiKey').value.trim();</span></p>
+<p class="p1"><span class="s1">  if (!apiKey || !apiKey.startsWith('sk-ant')) {</span></p>
+<p class="p1"><span class="s1">    alert('Please enter a valid Anthropic API key (starts with sk-ant-)');</span></p>
+<p class="p1"><span class="s1">    return;</span></p>
+<p class="p1"><span class="s1">  }</span></p>
+<p class="p2"><span class="s1"></span><br></p>
+<p class="p1"><span class="s1">  // Request notification permission</span></p>
+<p class="p1"><span class="s1">  if ('Notification' in window &amp;&amp; Notification.permission === 'default') {</span></p>
+<p class="p1"><span class="s1">    await Notification.requestPermission();</span></p>
+<p class="p1"><span class="s1">  }</span></p>
+<p class="p2"><span class="s1"></span><br></p>
+<p class="p1"><span class="s1">  state.alertFired = false;</span></p>
+<p class="p1"><span class="s1">  state.eventTimestamps = [];</span></p>
+<p class="p2"><span class="s1"></span><br></p>
+<p class="p1"><span class="s1">  document.getElementById('btnStart').disabled = true;</span></p>
+<p class="p1"><span class="s1">  document.getElementById('btnStop').disabled = false;</span></p>
+<p class="p1"><span class="s1">  document.getElementById('btnCheck').disabled = false;</span></p>
+<p class="p1"><span class="s1">  setStatus('monitoring');</span></p>
+<p class="p1"><span class="s1">  log('Monitoring started.', 'info');</span></p>
+<p class="p2"><span class="s1"></span><br></p>
+<p class="p1"><span class="s1">  const mins = parseFloat(document.getElementById('checkInterval').value) || 2;</span></p>
+<p class="p1"><span class="s1">  await doCheck();</span></p>
+<p class="p1"><span class="s1">  startCountdown(mins * 60);</span></p>
+<p class="p2"><span class="s1"></span><br></p>
+<p class="p1"><span class="s1">  monitorInterval = setInterval(async () =&gt; {</span></p>
+<p class="p1"><span class="s1">    await doCheck();</span></p>
+<p class="p1"><span class="s1">    startCountdown(mins * 60);</span></p>
+<p class="p1"><span class="s1">  }, mins * 60 * 1000);</span></p>
+<p class="p1"><span class="s1">}</span></p>
+<p class="p2"><span class="s1"></span><br></p>
+<p class="p1"><span class="s1">function stopMonitoring() {</span></p>
+<p class="p1"><span class="s1">  clearInterval(monitorInterval);</span></p>
+<p class="p1"><span class="s1">  clearInterval(countdownTick);</span></p>
+<p class="p1"><span class="s1">  monitorInterval = null;</span></p>
+<p class="p1"><span class="s1">  document.getElementById('btnStart').disabled = false;</span></p>
+<p class="p1"><span class="s1">  document.getElementById('btnStop').disabled = true;</span></p>
+<p class="p1"><span class="s1">  document.getElementById('btnCheck').disabled = true;</span></p>
+<p class="p1"><span class="s1">  document.getElementById('nextCheckLabel').textContent = '';</span></p>
+<p class="p1"><span class="s1">  document.getElementById('nextCheckFill').style.width = '0%';</span></p>
+<p class="p1"><span class="s1">  setStatus('idle');</span></p>
+<p class="p1"><span class="s1">  log('Monitoring stopped.', 'warn');</span></p>
+<p class="p1"><span class="s1">}</span></p>
+<p class="p1"><span class="s1">&lt;/script&gt;</span></p>
+<p class="p2"><span class="s1"></span><br></p>
+<p class="p1"><span class="s1">&lt;/body&gt;</span></p>
+<p class="p1"><span class="s1">&lt;/html&gt;</span></p>
+</body>
+</html>
