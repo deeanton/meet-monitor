@@ -471,7 +471,7 @@
 <div id="alertBanner" style="display:none" class="alert-banner">
   <span class="alert-icon">🚨</span>
   <span id="alertText">ALERT</span>
-  <button class="alert-close" onclick="dismissAlert()">✕ Dismiss</button>
+  <button class="alert-close" id="btnDismiss">✕ Dismiss</button>
 </div>
 
 <!-- Config -->
@@ -499,9 +499,9 @@
     </div>
   </div>
   <div class="controls">
-    <button class="btn-start" id="btnStart" onclick="startMonitoring()">▶ Start Monitoring</button>
-    <button class="btn-check" id="btnCheck" onclick="checkNow()" disabled>↻ Check Now</button>
-    <button class="btn-stop" id="btnStop" onclick="stopMonitoring()" disabled>■ Stop</button>
+    <button class="btn-start" id="btnStart" id="btnStartInner">▶ Start Monitoring</button>
+    <button class="btn-check" id="btnCheck"  disabled>↻ Check Now</button>
+    <button class="btn-stop" id="btnStop"  disabled>■ Stop</button>
   </div>
   <div class="next-check-bar" style="margin-top:12px">
     <div class="next-check-fill" id="nextCheckFill" style="width:0%"></div>
@@ -1218,7 +1218,7 @@ Rules:
 <div id="alertBanner" style="display:none" class="alert-banner">
   <span class="alert-icon">🚨</span>
   <span id="alertText">ALERT</span>
-  <button class="alert-close" onclick="dismissAlert()">✕ Dismiss</button>
+  <button class="alert-close" id="btnDismiss">✕ Dismiss</button>
 </div>
 
 <!-- Config -->
@@ -1246,9 +1246,9 @@ Rules:
     </div>
   </div>
   <div class="controls">
-    <button class="btn-start" id="btnStart" onclick="startMonitoring()">▶ Start Monitoring</button>
-    <button class="btn-check" id="btnCheck" onclick="checkNow()" disabled>↻ Check Now</button>
-    <button class="btn-stop" id="btnStop" onclick="stopMonitoring()" disabled>■ Stop</button>
+    <button class="btn-start" id="btnStart" id="btnStartInner">▶ Start Monitoring</button>
+    <button class="btn-check" id="btnCheck"  disabled>↻ Check Now</button>
+    <button class="btn-stop" id="btnStop"  disabled>■ Stop</button>
   </div>
   <div class="next-check-bar" style="margin-top:12px">
     <div class="next-check-fill" id="nextCheckFill" style="width:0%"></div>
@@ -1673,6 +1673,15 @@ function stopMonitoring() {
   setStatus('idle');
   log('Monitoring stopped.', 'warn');
 }
+
+// Wire up buttons via addEventListener (more reliable on iOS Safari)
+document.addEventListener('DOMContentLoaded', function() {
+  document.getElementById('btnStart').addEventListener('click', startMonitoring);
+  document.getElementById('btnCheck').addEventListener('click', checkNow);
+  document.getElementById('btnStop').addEventListener('click', stopMonitoring);
+  var dismiss = document.getElementById('btnDismiss');
+  if (dismiss) dismiss.addEventListener('click', dismissAlert);
+});
 </script>
 </body>
 </html>
