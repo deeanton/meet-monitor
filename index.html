@@ -206,6 +206,19 @@ function checkAlert() {
   }
 }
 
+async function fetchWithTimeout(url, options = {}, timeoutMs = 12000) {
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), timeoutMs);
+  try {
+    const r = await fetch(url, { ...options, signal: controller.signal });
+    clearTimeout(timer);
+    return r;
+  } catch(e) {
+    clearTimeout(timer);
+    throw e;
+  }
+}
+
 async function fetchMeetData() {
   const meetUrl = document.getElementById('meetUrl').value.trim();
   const apiKey = document.getElementById('apiKey').value.trim();
@@ -218,6 +231,12 @@ async function fetchMeetData() {
 
   log(`Fetching meet data (ID: ${meetId})...`);
 
+  const proxies = [
+    url => `https://corsproxy.io/?${encodeURIComponent(url)}`,
+    url => `https://api.allorigins.win/raw?url=${encodeURIComponent(url)}`,
+    url => `https://thingproxy.freeboard.io/fetch/${url}`,
+  ];
+
   // Try direct API endpoints first
   const apiEndpoints = [
     `https://liveresults.trxctiming.com/api/meets/${meetId}/events`,
@@ -226,23 +245,41 @@ async function fetchMeetData() {
   ];
 
   for (const endpoint of apiEndpoints) {
-    try {
-      log(`Trying API: ${endpoint.split('/').slice(-3).join('/')}`);
-      const r = await fetch(`https://corsproxy.io/?${encodeURIComponent(endpoint)}`);
-      if (r.ok) {
-        const json = await r.json();
-        log('Direct API success!', 'ok');
-        return parseDirectApi(json, target);
+    for (const proxy of proxies) {
+      try {
+        const proxyUrl = proxy(endpoint);
+        log(`Trying: ${proxyUrl.slice(0,60)}...`);
+        const r = await fetchWithTimeout(proxyUrl, {}, 10000);
+        if (r.ok) {
+          const json = await r.json();
+          log('Direct API success!', 'ok');
+          return parseDirectApi(json, target);
+        }
+        log(`Got ${r.status}, trying next...`);
+      } catch(e) {
+        log(`Proxy failed: ${e.message.slice(0,50)}`);
       }
-    } catch(e) { /* try next */ }
+    }
   }
 
   // Fall back to fetching HTML and asking Claude
-  log('Direct API failed, fetching page HTML...');
-  const proxyUrl = `https://corsproxy.io/?${encodeURIComponent(meetUrl)}`;
-  const htmlResp = await fetch(proxyUrl);
-  if (!htmlResp.ok) throw new Error(`CORS proxy failed: ${htmlResp.status}`);
-  const html = await htmlResp.text();
+  log('Trying HTML fetch via proxies...');
+  let html = null;
+  for (const proxy of proxies) {
+    try {
+      const proxyUrl = proxy(meetUrl);
+      log(`HTML proxy: ${proxyUrl.slice(0,60)}...`);
+      const htmlResp = await fetchWithTimeout(proxyUrl, {}, 12000);
+      if (htmlResp.ok) {
+        html = await htmlResp.text();
+        log(`Got HTML (${Math.round(html.length/1024)}KB)`, 'ok');
+        break;
+      }
+    } catch(e) {
+      log(`HTML proxy failed: ${e.message.slice(0,50)}`);
+    }
+  }
+  if (!html) throw new Error('All proxies failed — cannot reach meet page');
   log(`Got HTML (${Math.round(html.length/1024)}KB), sending to Claude...`);
 
   // Extract relevant portion
