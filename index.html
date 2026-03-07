@@ -133,14 +133,18 @@ let state = {
 };
 
 function log(msg, type = '') {
-  const now = new Date();
-  const t = now.toTimeString().slice(0,8);
-  const el = document.getElementById('logEntries');
-  const row = document.createElement('div');
-  row.className = 'log-entry';
-  row.innerHTML = `<span class="log-time">${t}</span><span class="log-msg ${type}">${msg}</span>`;
-  el.insertBefore(row, el.firstChild);
-  if (el.children.length > 100) el.removeChild(el.lastChild);
+  console.log(`[MeetMonitor] ${type} ${msg}`);
+  try {
+    const now = new Date();
+    const t = now.toTimeString().slice(0,8);
+    const el = document.getElementById('logEntries');
+    if (!el) { console.error('logEntries element not found!'); return; }
+    const row = document.createElement('div');
+    row.className = 'log-entry';
+    row.innerHTML = `<span class="log-time">${t}</span><span class="log-msg ${type}">${String(msg).replace(/</g,'&lt;')}</span>`;
+    el.insertBefore(row, el.firstChild);
+    if (el.children.length > 100) el.removeChild(el.lastChild);
+  } catch(e) { console.error('log() failed:', e); }
 }
 
 function setStatus(s) {
@@ -355,7 +359,8 @@ function normalize(events, target) {
 }
 
 async function doCheck() {
-  if (isChecking) return;
+  console.log('[MeetMonitor] doCheck called, isChecking=', isChecking);
+  if (isChecking) { console.log('[MeetMonitor] already checking, skipping'); return; }
   isChecking = true;
   setStatus('checking');
   document.getElementById('btnCheck').disabled = true;
