@@ -286,8 +286,17 @@ async function fetchMeetData() {
   if (!html) throw new Error('All proxies failed — cannot reach meet page');
   log(`Got HTML (${Math.round(html.length/1024)}KB), sending to Claude...`);
 
-  // Extract relevant portion
-  const snippet = html.slice(0, 8000);
+  // Extract script tag contents which often contain embedded JSON state
+  const scriptContents = [];
+  const scriptRe = /<script[^>]*>([\s\S]*?)<\/script>/gi;
+  let sm;
+  while ((sm = scriptRe.exec(html)) !== null) {
+    const s = sm[1].trim();
+    if (s.length > 50) scriptContents.push(s.slice(0, 2000));
+  }
+  const scripts = scriptContents.join('\n---\n').slice(0, 12000);
+  const bodySnippet = html.replace(/<style[\s\S]*?<\/style>/gi, '').replace(/<script[\s\S]*?<\/script>/gi, '').slice(0, 4000);
+  const snippet = `=== SCRIPT TAGS ===\n${scripts}\n\n=== BODY HTML ===\n${bodySnippet}`;
 
   const resp = await fetch('https://api.anthropic.com/v1/messages', {
     method: 'POST',
@@ -299,18 +308,23 @@ async function fetchMeetData() {
     },
     body: JSON.stringify({
       model: 'claude-haiku-4-5-20251001',
-      max_tokens: 1000,
+      max_tokens: 1500,
       messages: [{
         role: 'user',
-        content: `This is HTML from a track meet live results page. Extract the event schedule.
-Find: 1) which event is currently LIVE/active, 2) the ordered list of all events.
+        content: `This is from a track meet live results page (AthleticLIVE / Final Lap Timing).
+The page is JavaScript-rendered. Look carefully in the SCRIPT TAGS for embedded JSON data such as:
+- window.__INITIAL_STATE__, window.__DATA__, window.APP_DATA, or similar
+- Any JSON arrays containing event names, heat numbers, or results
+- Any variables containing "events", "schedule", "heats", "results"
+
 Target event to find: "${target}"
 
-HTML:
+Extract: 1) which event is currently LIVE/active, 2) ALL events in order.
+
 ${snippet}
 
-Reply ONLY with JSON, no markdown:
-{"currentLiveEvent":"<name or null>","events":[{"name":"<event name>","isLive":<true/false>}]}`
+Reply ONLY with valid JSON (no markdown fences):
+{"currentLiveEvent":"<name or null>","events":[{"name":"<event name>","isLive":<true/false>}],"note":"<what data you found or didnt find>"}`
       }]
     })
   });
@@ -330,6 +344,7 @@ Reply ONLY with JSON, no markdown:
   const jsonMatch = clean.match(/\{[\s\S]*\}/);
   if (!jsonMatch) throw new Error('Claude response had no JSON');
   const parsed = JSON.parse(jsonMatch[0]);
+  if (parsed.note) log(`Claude note: ${parsed.note}`);
   return normalizeClaude(parsed, target);
 }
 
