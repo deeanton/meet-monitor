@@ -128,6 +128,7 @@ let state = {
   targetIndex: -1,
   alertFired: false,
   lastCheckTime: null,
+  avgMinutesPerEvent: null,
 };
 
 function log(msg, type = '') {
@@ -181,7 +182,12 @@ function updateUI() {
   // ETA
   if (state.targetIndex > state.currentLiveIndex && state.currentLiveIndex >= 0) {
     const eventsAway = state.targetIndex - state.currentLiveIndex;
-    etaEl.textContent = `Target is ~${eventsAway} event${eventsAway !== 1 ? 's' : ''} away`;
+    let etaTxt = `~${eventsAway} event${eventsAway !== 1 ? 's' : ''} away`;
+    if (state.avgMinutesPerEvent) {
+      const mins = Math.round(eventsAway * state.avgMinutesPerEvent);
+      etaTxt += mins >= 60 ? ` · ~${Math.floor(mins/60)}h ${mins%60}m` : ` · ~${mins} min`;
+    }
+    etaEl.textContent = etaTxt;
   } else if (state.targetIndex === state.currentLiveIndex && state.currentLiveIndex >= 0) {
     etaEl.textContent = '🎯 Target event is LIVE NOW!';
   } else {
@@ -263,18 +269,42 @@ function parseFirebase(json, target) {
     return { name, isLive, raw: e };
   });
 
-  const nonDone = events.filter(e => e.raw.es !== 'r' && e.raw.es !== undefined);
-  log('Live candidates: ' + (nonDone.length ? nonDone.map(e=>e.name+' [es='+e.raw.es+']').join(' | ') : 'none'));
+  const nonDone = events.filter(e => e.raw.es === 'hr');
+  log('HR events: ' + (nonDone.length ? nonDone.map(e=>e.name+' [es='+e.raw.es+',resd='+e.raw.resd+']').join(' | ') : 'none'));
   log('Names: ' + events.slice(0,15).map(e=>e.name).join(' | '));
-  // For progression, use only track events (field events run concurrently)
   const fieldKeywords = ['long jump','high jump','shot put','pole vault','triple jump','discus','javelin','hammer','weight throw'];
   const isField = e => fieldKeywords.some(k => e.name.toLowerCase().includes(k));
+  const isDone = e => e.raw.es === 'r';
 
-  // Find the primary live track event (first live non-field event)
-  const currentLiveIndex = events.findIndex(e => e.isLive && !isField(e));
+  // Find current = last track event with results, then take the next track event after it
+  const trackEvents = events.map((e,i) => ({...e, origIndex: i})).filter(e => !isField(e));
+  const lastDoneTrackIdx = [...trackEvents].reverse().find(e => isDone(e))?.origIndex ?? -1;
+
+  let currentLiveIndex = -1;
+  if (lastDoneTrackIdx >= 0) {
+    // Find next track event after lastDoneTrackIdx that isn't done
+    const next = trackEvents.find(e => e.origIndex > lastDoneTrackIdx && !isDone(e));
+    if (next) currentLiveIndex = next.origIndex;
+  } else {
+    // No results yet, use first track event
+    const first = trackEvents.find(e => !isDone(e));
+    if (first) currentLiveIndex = first.origIndex;
+  }
 
   const targetIndex = events.findIndex(e => e.name.toLowerCase().includes(tLow));
-  return { events, currentLiveIndex, targetIndex };
+
+  // Estimate time per event using resd timestamps of recently completed track events
+  let avgMinutesPerEvent = null;
+  const recentDone = trackEvents.filter(e => isDone(e) && e.raw.resd).slice(-10);
+  if (recentDone.length >= 2) {
+    const times = recentDone.map(e => new Date(e.raw.resd).getTime()).filter(t => !isNaN(t)).sort((a,b) => a-b);
+    if (times.length >= 2) {
+      const spanMs = times[times.length-1] - times[0];
+      avgMinutesPerEvent = (spanMs / 60000) / (times.length - 1);
+    }
+  }
+
+  return { events, currentLiveIndex, targetIndex, avgMinutesPerEvent };
 }
 
 function normalize(events, target) {
@@ -296,11 +326,18 @@ async function doCheck() {
     state.events = result.events;
     state.currentLiveIndex = result.currentLiveIndex;
     state.targetIndex = result.targetIndex;
+    state.avgMinutesPerEvent = result.avgMinutesPerEvent;
     state.lastCheckTime = new Date();
 
     const liveName = state.currentLiveIndex >= 0 ? state.events[state.currentLiveIndex]?.name : 'none';
     const targetName = state.targetIndex >= 0 ? state.events[state.targetIndex]?.name : 'not found';
-    log(`Live: "${liveName}" | Target: "${targetName}" (index ${state.targetIndex})`, 'ok');
+    const eventsAway = (state.targetIndex >= 0 && state.currentLiveIndex >= 0) ? state.targetIndex - state.currentLiveIndex : null;
+    let etaStr = eventsAway !== null ? eventsAway + ' events away' : '?';
+    if (eventsAway !== null && state.avgMinutesPerEvent) {
+      const mins = Math.round(eventsAway * state.avgMinutesPerEvent);
+      etaStr += mins >= 60 ? ` (~${Math.floor(mins/60)}h ${mins%60}m)` : ` (~${mins}m)`;
+    }
+    log(`Live: "${liveName}" | Target: "${targetName}" | ETA: ${etaStr}`, 'ok');
 
     updateUI();
     checkAlert();
