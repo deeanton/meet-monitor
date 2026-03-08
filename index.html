@@ -263,6 +263,8 @@ function parseFirebase(json, target) {
     return { name, isLive, raw: e };
   });
 
+  const nonDone = events.filter(e => e.raw.es !== 'r' && e.raw.es !== undefined);
+  log('Live candidates: ' + (nonDone.length ? nonDone.map(e=>e.name+' [es='+e.raw.es+']').join(' | ') : 'none'));
   log('Names: ' + events.slice(0,15).map(e=>e.name).join(' | '));
   const currentLiveIndex = events.findIndex(e => e.isLive);
   const targetIndex = events.findIndex(e => e.name.toLowerCase().includes(tLow));
