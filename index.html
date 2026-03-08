@@ -254,7 +254,7 @@ function parseFirebase(json, target) {
   });
 
   // Log a sample entry so we can see the shape
-  if (entries.length > 0) log(`Sample: ${JSON.stringify(entries[0]).slice(0,120)}`);
+  if (entries.length > 0) log(`Sample: ${JSON.stringify(entries[0])}`);
 
   const events = entries.map(e => {
     const name = e.abn || e.ab || e.name || e.event_name || e.title || JSON.stringify(e).slice(0,40);
