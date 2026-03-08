@@ -302,29 +302,29 @@ function parseFirebase(json, target) {
 
   const targetIndex = events.findIndex(e => e.name.toLowerCase().includes(tLow));
 
-  // Count only undone track events between current and target (inclusive of current)
+  // Count undone track events between current and target by array position
   let eventsAwayCount = null;
   if (currentLiveIndex >= 0 && targetIndex >= 0) {
-    const currentSk = events[currentLiveIndex]?.raw.sk ?? 0;
-    const targetSk = events[targetIndex]?.raw.sk ?? 0;
-    // Count undone track events with sk between current and target (inclusive)
-    eventsAwayCount = trackEvents.filter(e => {
-      const sk = e.raw.sk ?? 0;
-      return !isDone(e) && sk >= currentSk && sk <= targetSk;
-    }).length - 1; // subtract 1 to exclude current event itself
-    if (eventsAwayCount < 0) eventsAwayCount = 0;
-    log(`Events away (track, undone, between current sk=${currentSk} and target sk=${targetSk}): ${eventsAwayCount}`);
+    // Get undone track events sorted by sk, find positions of current and target
+    const undoneTrack = trackEvents.filter(e => !isDone(e)).sort((a,b) => (a.raw.sk??0)-(b.raw.sk??0) || a.origIndex-b.origIndex);
+    const curPos = undoneTrack.findIndex(e => e.origIndex === currentLiveIndex);
+    const tgtPos = undoneTrack.findIndex(e => e.origIndex === targetIndex);
+    if (curPos >= 0 && tgtPos >= 0) {
+      eventsAwayCount = tgtPos - curPos;
+    }
+    log(`Events away: curPos=${curPos} tgtPos=${tgtPos} => ${eventsAwayCount}`);
   }
 
-  // Estimate time per event using resd timestamps of recently completed track events
+  // Estimate time per event using only TODAY's completed track events
   let avgMinutesPerEvent = null;
-  const recentDone = trackEvents.filter(e => isDone(e) && e.raw.resd).slice(-10);
+  const todayStr = new Date().toISOString().slice(0,10);
+  const recentDone = trackEvents.filter(e => isDone(e) && e.raw.resd && e.raw.resd.startsWith(todayStr));
+  recentDone.sort((a,b) => new Date(a.raw.resd) - new Date(b.raw.resd));
   if (recentDone.length >= 2) {
-    const times = recentDone.map(e => new Date(e.raw.resd).getTime()).filter(t => !isNaN(t)).sort((a,b) => a-b);
-    if (times.length >= 2) {
-      const spanMs = times[times.length-1] - times[0];
-      avgMinutesPerEvent = (spanMs / 60000) / (times.length - 1);
-    }
+    const times = recentDone.map(e => new Date(e.raw.resd).getTime());
+    const spanMs = times[times.length-1] - times[0];
+    avgMinutesPerEvent = (spanMs / 60000) / (times.length - 1);
+    log(`Avg min/event: ${avgMinutesPerEvent.toFixed(1)} (from ${recentDone.length} today's events)`);
   }
 
   return { events, currentLiveIndex, targetIndex, eventsAwayCount, avgMinutesPerEvent };
