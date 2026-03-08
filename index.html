@@ -399,7 +399,7 @@ function startMonitoring() {
   document.getElementById('btnCheck').disabled = false;
   document.getElementById('btnStop').disabled = false;
 
-  if (Notification.permission === 'default') Notification.requestPermission();
+  try { if ('Notification' in window && Notification.permission === 'default') Notification.requestPermission().catch(()=>{}); } catch(e) {}
 
   doCheck().catch(e => log('doCheck error: ' + e.message, 'err'));
   monitorInterval = setInterval(() => doCheck().catch(e => log('doCheck error: ' + e.message, 'err')), intervalMin * 60 * 1000);
