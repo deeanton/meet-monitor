@@ -281,6 +281,10 @@ function parseFirebase(json, target) {
   const trackEvents = events.map((e,i) => ({...e, origIndex: i})).filter(e => !isField(e));
   const lastDoneTrackIdx = [...trackEvents].reverse().find(e => isDone(e))?.origIndex ?? -1;
 
+  log(`Debug: lastDoneTrackIdx=${lastDoneTrackIdx}, trackEvents=${trackEvents.length}, totalEvents=${events.length}`);
+  const trulyLive = trackEvents.filter(e => !isDone(e) && (e.raw.es === 'hr' && !e.raw.resd));
+  log(`Truly live track: ${trulyLive.map(e=>e.name).join(' | ') || 'none'}`);
+
   let currentLiveIndex = -1;
   if (lastDoneTrackIdx >= 0) {
     // Find next track event after lastDoneTrackIdx that isn't done
