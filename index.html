@@ -277,27 +277,27 @@ function parseFirebase(json, target) {
   // es=r means done; es=hr with a resd timestamp also means done (results posted but status not updated)
   const isDone = e => e.raw.es === 'r' || (e.raw.es === 'hr' && e.raw.resd);
 
-  // Find current = last track event with results, then take the next track event after it
   const trackEvents = events.map((e,i) => ({...e, origIndex: i})).filter(e => !isField(e));
-  const lastDoneTrackIdx = [...trackEvents].reverse().find(e => isDone(e))?.origIndex ?? -1;
 
-  log(`Debug: lastDoneTrackIdx=${lastDoneTrackIdx}, trackEvents=${trackEvents.length}, totalEvents=${events.length}`);
-  if (lastDoneTrackIdx >= 0) log(`Last done track event: "${events[lastDoneTrackIdx]?.name}" es=${events[lastDoneTrackIdx]?.raw.es} resd=${events[lastDoneTrackIdx]?.raw.resd}`);
-  const ehEvents = trackEvents.filter(e => e.raw.es === 'eh').slice(0,5);
-  log(`First 5 eh track events: ${ehEvents.map(e=>e.name+' idx='+e.origIndex).join(' | ') || 'none'}`);
-  const trulyLive = trackEvents.filter(e => !isDone(e) && (e.raw.es === 'hr' && !e.raw.resd));
-  log(`Truly live track: ${trulyLive.map(e=>e.name).join(' | ') || 'none'}`);
-
+  // Use truly-live (hr, no resd) first; else find next event after most recently completed
+  const trulyLiveTrack = trackEvents.find(e => e.raw.es === 'hr' && !e.raw.resd);
   let currentLiveIndex = -1;
-  if (lastDoneTrackIdx >= 0) {
-    const next = trackEvents.find(e => e.origIndex > lastDoneTrackIdx && !isDone(e));
-    log(`Next undone track after ${lastDoneTrackIdx}: ${next ? next.name + ' origIndex=' + next.origIndex : 'none'}`);
-    if (next) currentLiveIndex = next.origIndex;
+
+  if (trulyLiveTrack) {
+    currentLiveIndex = trulyLiveTrack.origIndex;
+    log(`Current (live): "${trulyLiveTrack.name}"`);
   } else {
-    const first = trackEvents.find(e => !isDone(e));
-    if (first) currentLiveIndex = first.origIndex;
+    const doneWithTime = trackEvents.filter(e => isDone(e) && e.raw.resd);
+    doneWithTime.sort((a,b) => new Date(b.raw.resd) - new Date(a.raw.resd));
+    const mostRecentDone = doneWithTime[0];
+    if (mostRecentDone) {
+      const msk = mostRecentDone.raw.sk ?? 0;
+      const undone = trackEvents.filter(e => !isDone(e)).sort((a,b) => (a.raw.sk??0)-(b.raw.sk??0));
+      const next = undone.find(e => (e.raw.sk??0) >= msk) || undone[0];
+      log(`Most recent done: "${mostRecentDone.name}" sk=${msk} | Next: "${next?.name ?? 'none'}"`);
+      if (next) currentLiveIndex = next.origIndex;
+    }
   }
-  log(`currentLiveIndex=${currentLiveIndex}, targetIndex will be checked next`);
 
   const targetIndex = events.findIndex(e => e.name.toLowerCase().includes(tLow));
 
