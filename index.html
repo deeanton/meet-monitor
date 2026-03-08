@@ -281,9 +281,12 @@ function parseFirebase(json, target) {
   // Rely purely on most recent resd timestamp to anchor position — hr status is unreliable
   const ageGroup = e => { const m = e.name.match(/(\d+)[-–](\d+)\s*Year/i); return m ? parseInt(m[1]) : 999; };
   const sortKey = (a,b) => (a.raw.sk??0)-(b.raw.sk??0) || ageGroup(a)-ageGroup(b) || a.origIndex-b.origIndex;
-  const doneWithTime = trackEvents.filter(e => isDone(e) && e.raw.resd);
+  const now = Date.now();
+  // Only trust resd timestamps that are actually in the past
+  const doneWithTime = trackEvents.filter(e => isDone(e) && e.raw.resd && new Date(e.raw.resd).getTime() < now);
   doneWithTime.sort((a,b) => new Date(b.raw.resd) - new Date(a.raw.resd));
   const mostRecentDone = doneWithTime[0];
+  log(`Most recent done: "${mostRecentDone?.name}" resd=${mostRecentDone?.raw.resd}`);
 
   let currentLiveIndex = -1;
   if (mostRecentDone) {
