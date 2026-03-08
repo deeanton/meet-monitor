@@ -278,26 +278,20 @@ function parseFirebase(json, target) {
 
   const trackEvents = events.map((e,i) => ({...e, origIndex: i})).filter(e => !isField(e));
 
-  // Use truly-live (hr, no resd) first; else find next event after most recently completed
-  // Among hr+no-resd events, pick lowest age group (most likely actually running)
+  // Rely purely on most recent resd timestamp to anchor position — hr status is unreliable
   const ageGroup = e => { const m = e.name.match(/(\d+)[-–](\d+)\s*Year/i); return m ? parseInt(m[1]) : 999; };
-  const trulyLiveCandidates = trackEvents.filter(e => e.raw.es === 'hr' && !e.raw.resd);
-  trulyLiveCandidates.sort((a,b) => (a.raw.sk??0)-(b.raw.sk??0) || ageGroup(a)-ageGroup(b));
-  const trulyLiveTrack = trulyLiveCandidates[0] || null;
-  let currentLiveIndex = -1;
+  const sortKey = (a,b) => (a.raw.sk??0)-(b.raw.sk??0) || ageGroup(a)-ageGroup(b) || a.origIndex-b.origIndex;
+  const doneWithTime = trackEvents.filter(e => isDone(e) && e.raw.resd);
+  doneWithTime.sort((a,b) => new Date(b.raw.resd) - new Date(a.raw.resd));
+  const mostRecentDone = doneWithTime[0];
 
-  if (trulyLiveTrack) {
-    currentLiveIndex = trulyLiveTrack.origIndex;
-    } else {
-    const doneWithTime = trackEvents.filter(e => isDone(e) && e.raw.resd);
-    doneWithTime.sort((a,b) => new Date(b.raw.resd) - new Date(a.raw.resd));
-    const mostRecentDone = doneWithTime[0];
-    if (mostRecentDone) {
-      const msk = mostRecentDone.raw.sk ?? 0;
-      const undone = trackEvents.filter(e => !isDone(e)).sort((a,b) => (a.raw.sk??0)-(b.raw.sk??0));
-      const next = undone.find(e => (e.raw.sk??0) >= msk) || undone[0];
-          if (next) currentLiveIndex = next.origIndex;
-    }
+  let currentLiveIndex = -1;
+  if (mostRecentDone) {
+    const allSorted = [...trackEvents].sort(sortKey);
+    const undone = allSorted.filter(e => !isDone(e));
+    const donePos = allSorted.findIndex(e => e.origIndex === mostRecentDone.origIndex);
+    const next = undone.find(e => allSorted.findIndex(x => x.origIndex === e.origIndex) > donePos) || undone[0];
+    if (next) currentLiveIndex = next.origIndex;
   }
 
   const targetIndex = events.findIndex(e => e.name.toLowerCase().includes(tLow));
