@@ -81,8 +81,6 @@
   <input id="meetUrl" type="url" value="https://live.finallaptiminggroup.com/meets/60830">
   <label>Target Event</label>
   <input id="targetEvent" type="text" value="Girls 4x400">
-  <label>Anthropic API Key</label>
-  <input id="apiKey" type="password" placeholder="sk-ant-...">
   <div class="row">
     <div style="flex:1">
       <label>Alert Before (# events)</label>
@@ -225,125 +223,49 @@ async function fetchWithTimeout(url, options = {}, timeoutMs = 12000) {
 
 async function fetchMeetData() {
   const meetUrl = document.getElementById('meetUrl').value.trim();
-  const apiKey = document.getElementById('apiKey').value.trim();
   const target = document.getElementById('targetEvent').value.trim();
-
-  if (!apiKey) throw new Error('No API key entered');
 
   const meetId = meetUrl.match(/meets\/([0-9]+)/)?.[1];
   if (!meetId) throw new Error('Could not extract meet ID from URL');
 
-  log(`Fetching meet data (ID: ${meetId})...`);
+  log(`Querying Firebase for meet_${meetId}...`);
 
-  const proxies = [
-    url => `https://corsproxy.io/?${encodeURIComponent(url)}`,
-    url => `https://api.allorigins.win/raw?url=${encodeURIComponent(url)}`,
-    url => `https://thingproxy.freeboard.io/fetch/${url}`,
-  ];
+  const firebaseUrl = `https://trackmeet-io.firebaseio.com/meet_${meetId}/event_summary.json`;
+  const r = await fetchWithTimeout(firebaseUrl, {}, 12000);
+  if (!r.ok) throw new Error(`Firebase returned ${r.status}`);
 
-  // Try direct API endpoints first
-  const apiEndpoints = [
-    `https://liveresults.trxctiming.com/api/meets/${meetId}/events`,
-    `https://live.finallaptiminggroup.com/api/meets/${meetId}/events`,
-    `https://live.finallaptiminggroup.com/api/meets/${meetId}`,
-  ];
+  const json = await r.json();
+  if (!json) throw new Error('Firebase returned null — meet may not be live yet');
 
-  for (const endpoint of apiEndpoints) {
-    for (const proxy of proxies) {
-      try {
-        const proxyUrl = proxy(endpoint);
-        log(`Trying: ${proxyUrl.slice(0,60)}...`);
-        const r = await fetchWithTimeout(proxyUrl, {}, 10000);
-        if (r.ok) {
-          const json = await r.json();
-          log('Direct API success!', 'ok');
-          return parseDirectApi(json, target);
-        }
-        log(`Got ${r.status}, trying next...`);
-      } catch(e) {
-        log(`Proxy failed: ${e.message.slice(0,50)}`);
-      }
-    }
-  }
+  log(`Got ${Object.keys(json).length} events from Firebase`, 'ok');
+  return parseFirebase(json, target);
+}
 
-  // Fall back to fetching HTML and asking Claude
-  log('Trying HTML fetch via proxies...');
-  let html = null;
-  for (const proxy of proxies) {
-    try {
-      const proxyUrl = proxy(meetUrl);
-      log(`HTML proxy: ${proxyUrl.slice(0,60)}...`);
-      const htmlResp = await fetchWithTimeout(proxyUrl, {}, 12000);
-      if (htmlResp.ok) {
-        html = await htmlResp.text();
-        log(`Got HTML (${Math.round(html.length/1024)}KB)`, 'ok');
-        break;
-      }
-    } catch(e) {
-      log(`HTML proxy failed: ${e.message.slice(0,50)}`);
-    }
-  }
-  // Fall back: ask Claude to use web_search to browse the live page
-  log('Asking Claude to browse the live page directly...');
+function parseFirebase(json, target) {
+  const tLow = target.toLowerCase();
+  // Each key is like "Individual-2290263", value has name, status, sortOrder etc.
+  const entries = Object.values(json);
 
-  const resp = await fetch('https://api.anthropic.com/v1/messages', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      'x-api-key': apiKey,
-      'anthropic-version': '2023-06-01',
-      'anthropic-dangerous-direct-browser-access': 'true',
-    },
-    body: JSON.stringify({
-      model: 'claude-haiku-4-5-20251001',
-      max_tokens: 2000,
-      tools: [{ type: 'web_search_20250305', name: 'web_search' }],
-      messages: [{
-        role: 'user',
-        content: `Use your web search tool to visit this exact URL and read the track meet schedule: ${meetUrl}
-
-Find: 1) which event is currently LIVE, 2) the full ordered event list.
-Target event: "${target}"
-
-After searching, reply ONLY with this JSON (no markdown):
-{"currentLiveEvent":"<name or null>","events":[{"name":"<event name>","isLive":<true/false>}]}`
-      }]
-    })
+  // Sort by sort_order or event_number if available
+  entries.sort((a, b) => {
+    const ao = a.sort_order ?? a.sortOrder ?? a.event_number ?? 0;
+    const bo = b.sort_order ?? b.sortOrder ?? b.event_number ?? 0;
+    return ao - bo;
   });
 
-  log(`Claude: HTTP ${resp.status}`);
-  if (!resp.ok) {
-    const err = await resp.json().catch(() => ({}));
-    throw new Error(`Claude API ${resp.status}: ${err.error?.message || 'unknown'}`);
-  }
+  // Log a sample entry so we can see the shape
+  if (entries.length > 0) log(`Sample: ${JSON.stringify(entries[0]).slice(0,120)}`);
 
-  const data = await resp.json();
-  const text = (data.content || []).filter(b => b.type === 'text').map(b => b.text).join('');
-  log(`Claude replied: ${text.slice(0, 120)}`);
+  const events = entries.map(e => {
+    const name = e.name || e.event_name || e.title || e.event || JSON.stringify(e).slice(0,40);
+    const status = (e.status || e.event_status || '').toString().toLowerCase();
+    const isLive = status === 'l' || status === 'live' || status === 'active' || status === 'in_progress';
+    return { name, isLive, raw: e };
+  });
 
-  const clean = text.replace(/```json|```/g, '').trim();
-  const jsonMatch = clean.match(/\{[\s\S]*\}/);
-  if (!jsonMatch) throw new Error('Claude response had no JSON');
-  const parsed = JSON.parse(jsonMatch[0]);
-  return normalizeClaude(parsed, target);
-}
-
-function parseDirectApi(json, target) {
-  // Handle various API shapes
-  const list = Array.isArray(json) ? json : json.events || json.data || [];
-  const events = list.map(e => ({
-    name: e.name || e.event_name || e.title || String(e),
-    isLive: !!(e.live || e.is_live || e.status === 'live' || e.status === 'active')
-  }));
-  return normalize(events, target);
-}
-
-function normalizeClaude(parsed, target) {
-  const events = (parsed.events || []).map(e => ({
-    name: e.name || '',
-    isLive: !!e.isLive
-  }));
-  return normalize(events, target);
+  const currentLiveIndex = events.findIndex(e => e.isLive);
+  const targetIndex = events.findIndex(e => e.name.toLowerCase().includes(tLow));
+  return { events, currentLiveIndex, targetIndex };
 }
 
 function normalize(events, target) {
@@ -402,9 +324,6 @@ function startCountdown() {
 }
 
 function startMonitoring() {
-  const apiKey = document.getElementById('apiKey').value.trim();
-  if (!apiKey) { log('Please enter your Anthropic API key', 'err'); return; }
-
   const intervalMin = parseInt(document.getElementById('checkInterval').value) || 2;
   log(`Starting — checking every ${intervalMin} min`);
   setStatus('running');
