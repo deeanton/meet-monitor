@@ -235,7 +235,7 @@ async function fetchMeetData() {
   const meetId = meetUrl.match(/meets\/([0-9]+)/)?.[1];
   if (!meetId) throw new Error('Could not extract meet ID from URL');
 
-  log(`Querying Firebase for meet_${meetId}...`);
+  log(`meetId=${meetId}, fetching...`);
 
   const firebaseUrl = `https://trackmeet-io.firebaseio.com/meet_${meetId}/event_summary.json`;
   const r = await fetchWithTimeout(firebaseUrl, {}, 12000);
@@ -335,8 +335,8 @@ function normalize(events, target) {
 }
 
 async function doCheck() {
-  console.log('[MeetMonitor] doCheck called, isChecking=', isChecking);
-  if (isChecking) { console.log('[MeetMonitor] already checking, skipping'); return; }
+  log('doCheck started...');
+  if (isChecking) { log('Already checking, skipping'); return; }
   isChecking = true;
   setStatus('checking');
   document.getElementById('btnCheck').disabled = true;
@@ -401,8 +401,8 @@ function startMonitoring() {
 
   if (Notification.permission === 'default') Notification.requestPermission();
 
-  doCheck();
-  monitorInterval = setInterval(doCheck, intervalMin * 60 * 1000);
+  doCheck().catch(e => log('doCheck error: ' + e.message, 'err'));
+  monitorInterval = setInterval(() => doCheck().catch(e => log('doCheck error: ' + e.message, 'err')), intervalMin * 60 * 1000);
   startCountdown();
 }
 
