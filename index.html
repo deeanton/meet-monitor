@@ -181,15 +181,15 @@ function updateUI() {
   });
 
   // ETA
-  if (state.targetIndex > state.currentLiveIndex && state.currentLiveIndex >= 0) {
-    const eventsAway = state.eventsAwayCount ?? (state.targetIndex - state.currentLiveIndex);
+  const eventsAway = state.eventsAwayCount;
+  if (eventsAway !== null && eventsAway > 0) {
     let etaTxt = `~${eventsAway} event${eventsAway !== 1 ? 's' : ''} away`;
     if (state.avgMinutesPerEvent) {
       const mins = Math.round(eventsAway * state.avgMinutesPerEvent);
       etaTxt += mins >= 60 ? ` · ~${Math.floor(mins/60)}h ${mins%60}m` : ` · ~${mins} min`;
     }
     etaEl.textContent = etaTxt;
-  } else if (eventsAway === 0 && state.currentLiveIndex >= 0) {
+  } else if (eventsAway === 0) {
     etaEl.textContent = '🎯 Target event is LIVE NOW!';
   } else {
     etaEl.textContent = '';
@@ -307,6 +307,7 @@ function parseFirebase(json, target) {
   if (currentLiveIndex >= 0 && targetIndex >= 0) {
     // Get undone track events sorted by sk, find positions of current and target
     const undoneTrack = trackEvents.filter(e => !isDone(e)).sort((a,b) => (a.raw.sk??0)-(b.raw.sk??0) || a.origIndex-b.origIndex);
+    log(`Undone track order (first 10): ${undoneTrack.slice(0,10).map((e,i)=>i+':'+e.name).join(' | ')}`);
     const curPos = undoneTrack.findIndex(e => e.origIndex === currentLiveIndex);
     const tgtPos = undoneTrack.findIndex(e => e.origIndex === targetIndex);
     if (curPos >= 0 && tgtPos >= 0) {
