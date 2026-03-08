@@ -248,17 +248,17 @@ function parseFirebase(json, target) {
 
   // Sort by sort_order or event_number if available
   entries.sort((a, b) => {
-    const ao = a.sort_order ?? a.sortOrder ?? a.event_number ?? 0;
-    const bo = b.sort_order ?? b.sortOrder ?? b.event_number ?? 0;
+    const ao = a.sk ?? a.sort_order ?? a.sortOrder ?? 0;
+    const bo = b.sk ?? b.sort_order ?? b.sortOrder ?? 0;
     return ao - bo;
   });
 
   // Log a sample entry so we can see the shape
-  if (entries.length > 0) log(`Sample: ${JSON.stringify(entries[0])}`);
+  if (entries.length > 0) log(`Sample fields: n=${entries[0].n} | es=${entries[0].es} | sk=${entries[0].sk}`);
 
   const events = entries.map(e => {
-    const name = e.abn || e.ab || e.name || e.event_name || e.title || JSON.stringify(e).slice(0,40);
-    const status = (e.ss || e.status || e.event_status || '').toString().toLowerCase();
+    const name = e.n || e.abn || e.ab || e.name || JSON.stringify(e).slice(0,40);
+    const status = (e.es || e.ss || e.status || '').toString().toLowerCase();
     const isLive = status === 'l' || status === 'live' || status === 'active' || status === 'in_progress';
     return { name, isLive, raw: e };
   });
