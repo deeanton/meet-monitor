@@ -287,14 +287,14 @@ function parseFirebase(json, target) {
 
   let currentLiveIndex = -1;
   if (lastDoneTrackIdx >= 0) {
-    // Find next track event after lastDoneTrackIdx that isn't done
     const next = trackEvents.find(e => e.origIndex > lastDoneTrackIdx && !isDone(e));
+    log(`Next undone track after ${lastDoneTrackIdx}: ${next ? next.name + ' origIndex=' + next.origIndex : 'none'}`);
     if (next) currentLiveIndex = next.origIndex;
   } else {
-    // No results yet, use first track event
     const first = trackEvents.find(e => !isDone(e));
     if (first) currentLiveIndex = first.origIndex;
   }
+  log(`currentLiveIndex=${currentLiveIndex}, targetIndex will be checked next`);
 
   const targetIndex = events.findIndex(e => e.name.toLowerCase().includes(tLow));
 
