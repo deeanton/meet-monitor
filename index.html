@@ -73,6 +73,7 @@
   <div class="alert-title">⚠️ Target Event Approaching!</div>
   <div class="alert-body" id="alertBody"></div>
   <button id="btnDismiss">Dismiss</button>
+  <button id="btnResetAlert" style="background:#1e2230;color:#aaa;margin-top:6px;width:auto;padding:6px 14px;">Reset Alert</button>
 </div>
 
 <div class="card">
@@ -278,7 +279,11 @@ function parseFirebase(json, target) {
   const trackEvents = events.map((e,i) => ({...e, origIndex: i})).filter(e => !isField(e));
 
   // Use truly-live (hr, no resd) first; else find next event after most recently completed
-  const trulyLiveTrack = trackEvents.find(e => e.raw.es === 'hr' && !e.raw.resd);
+  // Among hr+no-resd events, pick lowest age group (most likely actually running)
+  const ageGroup = e => { const m = e.name.match(/(\d+)[-–](\d+)\s*Year/i); return m ? parseInt(m[1]) : 999; };
+  const trulyLiveCandidates = trackEvents.filter(e => e.raw.es === 'hr' && !e.raw.resd);
+  trulyLiveCandidates.sort((a,b) => (a.raw.sk??0)-(b.raw.sk??0) || ageGroup(a)-ageGroup(b));
+  const trulyLiveTrack = trulyLiveCandidates[0] || null;
   let currentLiveIndex = -1;
 
   if (trulyLiveTrack) {
@@ -435,6 +440,10 @@ document.getElementById('btnStart').addEventListener('click', startMonitoring);
 document.getElementById('btnCheck').addEventListener('click', checkNow);
 document.getElementById('btnStop').addEventListener('click', stopMonitoring);
 document.getElementById('btnDismiss').addEventListener('click', dismissAlert);
+document.getElementById('btnResetAlert').addEventListener('click', () => {
+  state.alertFired = false;
+  log('Alert reset — will fire again when threshold reached.', 'warn');
+});
 </script>
 </body>
 </html>
