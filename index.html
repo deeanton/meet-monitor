@@ -282,6 +282,9 @@ function parseFirebase(json, target) {
   const lastDoneTrackIdx = [...trackEvents].reverse().find(e => isDone(e))?.origIndex ?? -1;
 
   log(`Debug: lastDoneTrackIdx=${lastDoneTrackIdx}, trackEvents=${trackEvents.length}, totalEvents=${events.length}`);
+  if (lastDoneTrackIdx >= 0) log(`Last done track event: "${events[lastDoneTrackIdx]?.name}" es=${events[lastDoneTrackIdx]?.raw.es} resd=${events[lastDoneTrackIdx]?.raw.resd}`);
+  const ehEvents = trackEvents.filter(e => e.raw.es === 'eh').slice(0,5);
+  log(`First 5 eh track events: ${ehEvents.map(e=>e.name+' idx='+e.origIndex).join(' | ') || 'none'}`);
   const trulyLive = trackEvents.filter(e => !isDone(e) && (e.raw.es === 'hr' && !e.raw.resd));
   log(`Truly live track: ${trulyLive.map(e=>e.name).join(' | ') || 'none'}`);
 
