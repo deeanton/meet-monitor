@@ -257,12 +257,13 @@ function parseFirebase(json, target) {
   if (entries.length > 0) log(`Sample: ${JSON.stringify(entries[0]).slice(0,120)}`);
 
   const events = entries.map(e => {
-    const name = e.name || e.event_name || e.title || e.event || JSON.stringify(e).slice(0,40);
-    const status = (e.status || e.event_status || '').toString().toLowerCase();
+    const name = e.abn || e.ab || e.name || e.event_name || e.title || JSON.stringify(e).slice(0,40);
+    const status = (e.ss || e.status || e.event_status || '').toString().toLowerCase();
     const isLive = status === 'l' || status === 'live' || status === 'active' || status === 'in_progress';
     return { name, isLive, raw: e };
   });
 
+  log('Names: ' + events.slice(0,15).map(e=>e.name).join(' | '));
   const currentLiveIndex = events.findIndex(e => e.isLive);
   const targetIndex = events.findIndex(e => e.name.toLowerCase().includes(tLow));
   return { events, currentLiveIndex, targetIndex };
