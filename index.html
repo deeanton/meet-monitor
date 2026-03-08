@@ -259,14 +259,20 @@ function parseFirebase(json, target) {
   const events = entries.map(e => {
     const name = e.n || e.abn || e.ab || e.name || JSON.stringify(e).slice(0,40);
     const status = (e.es || e.ss || e.status || '').toString().toLowerCase();
-    const isLive = status === 'l' || status === 'live' || status === 'active' || status === 'in_progress';
+    const isLive = status === 'hr' || status === 'l' || status === 'live' || status === 'active';
     return { name, isLive, raw: e };
   });
 
   const nonDone = events.filter(e => e.raw.es !== 'r' && e.raw.es !== undefined);
   log('Live candidates: ' + (nonDone.length ? nonDone.map(e=>e.name+' [es='+e.raw.es+']').join(' | ') : 'none'));
   log('Names: ' + events.slice(0,15).map(e=>e.name).join(' | '));
-  const currentLiveIndex = events.findIndex(e => e.isLive);
+  // For progression, use only track events (field events run concurrently)
+  const fieldKeywords = ['long jump','high jump','shot put','pole vault','triple jump','discus','javelin','hammer','weight throw'];
+  const isField = e => fieldKeywords.some(k => e.name.toLowerCase().includes(k));
+
+  // Find the primary live track event (first live non-field event)
+  const currentLiveIndex = events.findIndex(e => e.isLive && !isField(e));
+
   const targetIndex = events.findIndex(e => e.name.toLowerCase().includes(tLow));
   return { events, currentLiveIndex, targetIndex };
 }
