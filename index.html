@@ -261,7 +261,6 @@ function parseFirebase(json, target) {
   });
 
   // Log a sample entry so we can see the shape
-  if (entries.length > 0) log(`Sample fields: n=${entries[0].n} | es=${entries[0].es} | sk=${entries[0].sk}`);
 
   const events = entries.map(e => {
     const name = e.n || e.abn || e.ab || e.name || JSON.stringify(e).slice(0,40);
@@ -271,8 +270,6 @@ function parseFirebase(json, target) {
   });
 
   const nonDone = events.filter(e => e.raw.es === 'hr');
-  log('HR events: ' + (nonDone.length ? nonDone.map(e=>e.name+' [es='+e.raw.es+',resd='+e.raw.resd+']').join(' | ') : 'none'));
-  log('Names: ' + events.slice(0,15).map(e=>e.name).join(' | '));
   const fieldKeywords = ['long jump','high jump','shot put','pole vault','triple jump','discus','javelin','hammer','weight throw'];
   const isField = e => fieldKeywords.some(k => e.name.toLowerCase().includes(k));
   // es=r means done; es=hr with a resd timestamp also means done (results posted but status not updated)
@@ -286,8 +283,7 @@ function parseFirebase(json, target) {
 
   if (trulyLiveTrack) {
     currentLiveIndex = trulyLiveTrack.origIndex;
-    log(`Current (live): "${trulyLiveTrack.name}"`);
-  } else {
+    } else {
     const doneWithTime = trackEvents.filter(e => isDone(e) && e.raw.resd);
     doneWithTime.sort((a,b) => new Date(b.raw.resd) - new Date(a.raw.resd));
     const mostRecentDone = doneWithTime[0];
@@ -295,8 +291,7 @@ function parseFirebase(json, target) {
       const msk = mostRecentDone.raw.sk ?? 0;
       const undone = trackEvents.filter(e => !isDone(e)).sort((a,b) => (a.raw.sk??0)-(b.raw.sk??0));
       const next = undone.find(e => (e.raw.sk??0) >= msk) || undone[0];
-      log(`Most recent done: "${mostRecentDone.name}" sk=${msk} | Next: "${next?.name ?? 'none'}"`);
-      if (next) currentLiveIndex = next.origIndex;
+          if (next) currentLiveIndex = next.origIndex;
     }
   }
 
@@ -307,14 +302,12 @@ function parseFirebase(json, target) {
   if (currentLiveIndex >= 0 && targetIndex >= 0) {
     // Get undone track events sorted by sk, find positions of current and target
     const undoneTrack = trackEvents.filter(e => !isDone(e)).sort((a,b) => (a.raw.sk??0)-(b.raw.sk??0) || a.origIndex-b.origIndex);
-    log(`Undone track order (first 10): ${undoneTrack.slice(0,10).map((e,i)=>i+':'+e.name).join(' | ')}`);
-    const curPos = undoneTrack.findIndex(e => e.origIndex === currentLiveIndex);
+      const curPos = undoneTrack.findIndex(e => e.origIndex === currentLiveIndex);
     const tgtPos = undoneTrack.findIndex(e => e.origIndex === targetIndex);
     if (curPos >= 0 && tgtPos >= 0) {
       eventsAwayCount = tgtPos - curPos;
     }
-    log(`Events away: curPos=${curPos} tgtPos=${tgtPos} => ${eventsAwayCount}`);
-  }
+    }
 
   // Estimate time per event using only TODAY's completed track events
   let avgMinutesPerEvent = null;
@@ -325,8 +318,7 @@ function parseFirebase(json, target) {
     const times = recentDone.map(e => new Date(e.raw.resd).getTime());
     const spanMs = times[times.length-1] - times[0];
     avgMinutesPerEvent = (spanMs / 60000) / (times.length - 1);
-    log(`Avg min/event: ${avgMinutesPerEvent.toFixed(1)} (from ${recentDone.length} today's events)`);
-  }
+    }
 
   return { events, currentLiveIndex, targetIndex, eventsAwayCount, avgMinutesPerEvent };
 }
