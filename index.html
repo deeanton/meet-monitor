@@ -274,7 +274,8 @@ function parseFirebase(json, target) {
   log('Names: ' + events.slice(0,15).map(e=>e.name).join(' | '));
   const fieldKeywords = ['long jump','high jump','shot put','pole vault','triple jump','discus','javelin','hammer','weight throw'];
   const isField = e => fieldKeywords.some(k => e.name.toLowerCase().includes(k));
-  const isDone = e => e.raw.es === 'r';
+  // es=r means done; es=hr with a resd timestamp also means done (results posted but status not updated)
+  const isDone = e => e.raw.es === 'r' || (e.raw.es === 'hr' && e.raw.resd);
 
   // Find current = last track event with results, then take the next track event after it
   const trackEvents = events.map((e,i) => ({...e, origIndex: i})).filter(e => !isField(e));
