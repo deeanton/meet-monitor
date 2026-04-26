@@ -352,10 +352,35 @@ function parseFirebase(json, target, liveData) {
         eventsAwayCount = between.length + 1;
         log(`Events away by sd: ${eventsAwayCount}`);
       } else {
-        // All events share same sd — fall back to total undone count (rough upper bound)
-        const undoneCount = trackEvents.filter(e => !isDone(e) && e.origIndex !== targetIndex).length;
-        eventsAwayCount = undoneCount;
-        log(`Events away (rough upper bound, sd not usable): ${eventsAwayCount}`);
+        // Infer running order from completed events (sorted by resd or ua)
+        // Pattern: events similar to those completed recently are likely next
+        // Heuristic: count undone track events that share a "category" with recently done events
+        const recentDone = trackEvents.filter(e => isDone(e) && (e.raw.resd || e.raw.ua))
+          .sort((a,b) => new Date(b.raw.resd || b.raw.ua) - new Date(a.raw.resd || a.raw.ua))
+          .slice(0, 5);
+        // Get distance keywords from recently done events (e.g. "800m", "400m")
+        const recentDistances = new Set();
+        recentDone.forEach(e => {
+          const m = e.name.match(/(\d+)m/i);
+          if (m) recentDistances.add(m[1]);
+        });
+        const targetMatch = events[targetIndex].name.match(/(\d+)m/i);
+        const targetDist = targetMatch ? targetMatch[1] : null;
+
+        // If target is in same distance category as recent events, count remaining at that distance
+        if (targetDist && recentDistances.has(targetDist)) {
+          // Count undone events at the same distance, ordered by typical age progression
+          const sameDist = trackEvents.filter(e => !isDone(e) && e.name.includes(targetDist + 'm'));
+          const tgtPos = sameDist.findIndex(e => e.origIndex === targetIndex);
+          eventsAwayCount = tgtPos >= 0 ? tgtPos : sameDist.length;
+          log(`Events away (same distance ${targetDist}m): ${eventsAwayCount}`);
+        } else {
+          // Different distance — count undone events at recent distances + events at target distance up to target
+          const sameDistAhead = targetDist ? trackEvents.filter(e => !isDone(e) && e.name.includes(targetDist + 'm')).length : 0;
+          const otherUndone = trackEvents.filter(e => !isDone(e) && e.origIndex !== targetIndex && (!targetDist || !e.name.includes(targetDist + 'm'))).length;
+          eventsAwayCount = otherUndone + sameDistAhead;
+          log(`Events away (cross-distance estimate): ${eventsAwayCount}`);
+        }
       }
     }
   }
@@ -375,16 +400,15 @@ function parseFirebase(json, target, liveData) {
     log(`Pace: ${avgMinutesPerHeat.toFixed(1)} min/heat from last ${recentDone.length} events`);
   }
 
-  // Count total heats remaining between current (exclusive) and target (inclusive)
+  // Estimate total heats: eventsAwayCount × average heats per recent event
   let totalHeatsAway = null;
-  if (eventsAwayCount !== null && currentLiveIndex >= 0 && targetIndex >= 0) {
-    const allSorted2 = [...trackEvents].sort(sortKey);
-    const undone2 = allSorted2.filter(e => !isDone(e));
-    const curPos2 = undone2.findIndex(e => e.origIndex === currentLiveIndex);
-    const tgtPos2 = undone2.findIndex(e => e.origIndex === targetIndex);
-    if (curPos2 >= 0 && tgtPos2 >= 0) {
-      totalHeatsAway = undone2.slice(curPos2, tgtPos2).reduce((sum, e) => sum + (e.raw.nh || 1), 0);
-    }
+  if (eventsAwayCount !== null && eventsAwayCount > 0) {
+    const recentHeats = recentDone.length > 0
+      ? recentDone.reduce((sum, e) => sum + (e.raw.nh || 1), 0) / recentDone.length
+      : 1;
+    totalHeatsAway = Math.round(eventsAwayCount * recentHeats);
+  } else if (eventsAwayCount === 0) {
+    totalHeatsAway = 0;
   }
 
   return { events, currentLiveIndex, targetIndex, eventsAwayCount, avgMinutesPerHeat, totalHeatsAway };
