@@ -287,11 +287,15 @@ function parseFirebase(json, target) {
   const ageGroup = e => { const m = e.name.match(/(\d+)[-–](\d+)\s*Year/i); return m ? parseInt(m[1]) : 999; };
   const sortKey = (a,b) => (a.raw.sk??0)-(b.raw.sk??0) || ageGroup(a)-ageGroup(b) || a.origIndex-b.origIndex;
   // Use 'ua' (updated-at) timestamp — most recently updated track event is the live one
-  const doneWithTime = trackEvents.filter(e => e.raw.ua);
-  doneWithTime.sort((a,b) => new Date(b.raw.ua) - new Date(a.raw.ua));
-  const mostRecentDone = doneWithTime[0];
-  const top5 = doneWithTime.slice(0,5).map(e => e.name + ' [ua=' + e.raw.ua + ',es=' + e.raw.es + ']').join(' | ');
+  const allByUa = trackEvents.filter(e => e.raw.ua);
+  allByUa.sort((a,b) => new Date(b.raw.ua) - new Date(a.raw.ua));
+  const top5 = allByUa.slice(0,5).map(e => e.name + ' [ua=' + e.raw.ua + ',es=' + e.raw.es + ']').join(' | ');
   log(`Top 5 by ua: ${top5}`);
+
+  // Find most recently updated event that is done (r) or actively running (hr)
+  // Skip eh events — they are pre-staged and not yet running
+  const doneWithTime = allByUa.filter(e => e.raw.es === 'r' || e.raw.es === 'hr');
+  const mostRecentDone = doneWithTime[0];
 
   let currentLiveIndex = -1;
   if (mostRecentDone) {
