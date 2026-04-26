@@ -281,7 +281,7 @@ function parseFirebase(json, target) {
   const trackEvents = events.map((e,i) => ({...e, origIndex: i})).filter(e => !isField(e));
 
   const ageGroup = e => { const m = e.name.match(/(\d+)[-–](\d+)\s*Year/i); return m ? parseInt(m[1]) : 999; };
-  const sortKey = (a,b) => (a.raw.sk??0)-(b.raw.sk??0) || ageGroup(a)-ageGroup(b) || a.origIndex-b.origIndex;
+  const sortKey = (a,b) => a.origIndex - b.origIndex;
 
   // Use ua timestamp to find where the meet is
   const allByUa = trackEvents.filter(e => e.raw.ua);
@@ -332,9 +332,7 @@ function parseFirebase(json, target) {
     // Get undone track events sorted by sk, find positions of current and target
     // For events with same sk (e.g. relays), sort by age group number then origIndex
     const ageGroup = e => { const m = e.name.match(/(\d+)[-–](\d+)\s*Year/i); return m ? parseInt(m[1]) : 999; };
-    const undoneTrack = trackEvents.filter(e => !isDone(e)).sort((a,b) =>
-      (a.raw.sk??0)-(b.raw.sk??0) || ageGroup(a)-ageGroup(b) || a.origIndex-b.origIndex
-    );
+    const undoneTrack = trackEvents.filter(e => !isDone(e)).sort((a,b) => a.origIndex - b.origIndex);
       const curPos = undoneTrack.findIndex(e => e.origIndex === currentLiveIndex);
     const tgtPos = undoneTrack.findIndex(e => e.origIndex === targetIndex);
     if (curPos >= 0 && tgtPos >= 0) {
