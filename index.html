@@ -272,7 +272,7 @@ function parseFirebase(json, target) {
     const name = e.n || e.abn || e.ab || e.name || JSON.stringify(e).slice(0,40);
     const status = (e.es || e.ss || e.status || '').toString().toLowerCase();
     const isLive = status === 'hr' || status === 'l' || status === 'live' || status === 'active';
-    return { name, isLive, raw: { es: e.es, resd: e.resd, ua: e.ua, sk: e.sk, nh: e.nh } };
+    return { name, isLive, raw: { es: e.es, resd: e.resd, ua: e.ua, sk: e.sk, nh: e.nh, sd: e.sd } };
   });
 
   const nonDone = events.filter(e => e.raw.es === 'hr');
@@ -289,56 +289,43 @@ function parseFirebase(json, target) {
   const top5 = allByUa.slice(0,5).map(e => e.name + ' [ua=' + e.raw.ua + ',es=' + e.raw.es + ']').join(' | ');
   log(`Top 5 by ua: ${top5}`);
 
-  // Most recently updated event = anchor for where meet is
-  const mostRecentAny = allByUa[0];
-  const uaAgeMs = mostRecentAny?.raw.ua ? Date.now() - new Date(mostRecentAny.raw.ua).getTime() : Infinity;
-  const doneWithTime = uaAgeMs < 20 * 60 * 1000
-    ? allByUa
-    : allByUa.filter(e => e.raw.es === 'r' || e.raw.es === 'hr');
-  const mostRecentDone = doneWithTime[0];
+  // Just use the single most recently updated track event as "current"
+  // This is the most reliable signal — meet software updates events as they progress
+  const mostRecentDone = allByUa[0];
 
   // isDone: only trust es=r (results posted). Don't infer done from ua.
   const isDone = e => e.raw.es === 'r' || (e.raw.es === 'hr' && e.raw.resd);
 
+  // Use the most recently updated track event as current — most reliable signal
   let currentLiveIndex = -1;
   if (mostRecentDone) {
-    const allSorted = [...trackEvents].sort(sortKey);
-    // If most recently updated event is hr AND updated within last 10 min, it's live
-    const ageNow = Date.now();
-    const uaAge = mostRecentDone.raw.ua ? ageNow - new Date(mostRecentDone.raw.ua).getTime() : Infinity;
-    const isRecentlyActive = mostRecentDone.raw.es === 'hr' && uaAge < 20 * 60 * 1000;
-    if (isRecentlyActive) {
-      currentLiveIndex = mostRecentDone.origIndex;
-      log(`Current (hr, ${Math.round(uaAge/1000)}s ago): "${mostRecentDone.name}"`);
-    } else {
-      // Find most recently updated DONE event as anchor
-      const lastDone = doneWithTime.find(e => e.raw.es === 'r' || (e.raw.es === 'hr' && !isRecentlyActive));
-      const anchor = doneWithTime.find(e => e.raw.es === 'r') || mostRecentDone;
-      const undone = allSorted.filter(e => !isDone(e));
-      const donePos = allSorted.findIndex(e => e.origIndex === anchor.origIndex);
-      const next = undone.find(e => allSorted.findIndex(x => x.origIndex === e.origIndex) > donePos) || undone[0];
-      const undoneNames = undone.slice(0,8).map(e=>e.name).join(' | ');
-    log(`Undone (first 8): ${undoneNames}`);
-    log(`Anchor: "${anchor.name}" sk=${anchor.raw.sk} → Next: "${next?.name ?? 'none'}"`);
-      if (next) currentLiveIndex = next.origIndex;
-    }
+    currentLiveIndex = mostRecentDone.origIndex;
+    log(`Current: "${mostRecentDone.name}" (es=${mostRecentDone.raw.es}, ua=${mostRecentDone.raw.ua})`);
   }
 
   const targetIndex = events.findIndex(e => e.name.toLowerCase().includes(tLow));
 
-  // Count undone track events between current and target by array position
+  // Use scheduled start time (sd) to determine running order — that's the true sort key
   let eventsAwayCount = null;
   if (currentLiveIndex >= 0 && targetIndex >= 0) {
-    // Get undone track events sorted by sk, find positions of current and target
-    // For events with same sk (e.g. relays), sort by age group number then origIndex
-    const ageGroup = e => { const m = e.name.match(/(\d+)[-–](\d+)\s*Year/i); return m ? parseInt(m[1]) : 999; };
-    const undoneTrack = trackEvents.filter(e => !isDone(e)).sort((a,b) => a.origIndex - b.origIndex);
-      const curPos = undoneTrack.findIndex(e => e.origIndex === currentLiveIndex);
-    const tgtPos = undoneTrack.findIndex(e => e.origIndex === targetIndex);
-    if (curPos >= 0 && tgtPos >= 0) {
-      eventsAwayCount = tgtPos - curPos;
+    const current = events[currentLiveIndex];
+    const target = events[targetIndex];
+    if (isDone(target) || currentLiveIndex === targetIndex) {
+      eventsAwayCount = 0;
+    } else {
+      const currentSd = current.raw.sd ? new Date(current.raw.sd).getTime() : 0;
+      const targetSd = target.raw.sd ? new Date(target.raw.sd).getTime() : 0;
+      // Count undone track events with sd between current and target
+      const between = trackEvents.filter(e => {
+        if (isDone(e)) return false;
+        if (e.origIndex === currentLiveIndex || e.origIndex === targetIndex) return false;
+        const eSd = e.raw.sd ? new Date(e.raw.sd).getTime() : 0;
+        return eSd > currentSd && eSd <= targetSd;
+      });
+      eventsAwayCount = between.length + 1; // +1 for the target itself
+      log(`Events away by sd: ${eventsAwayCount} (between current sd=${current.raw.sd} and target sd=${target.raw.sd})`);
     }
-    }
+  }
 
   // Estimate minutes per heat using today's completed track events weighted by heat count
   let avgMinutesPerHeat = null;
