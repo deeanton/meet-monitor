@@ -278,36 +278,33 @@ function parseFirebase(json, target) {
   const nonDone = events.filter(e => e.raw.es === 'hr');
   const fieldKeywords = ['long jump','high jump','shot put','pole vault','triple jump','discus','javelin','hammer','weight throw'];
   const isField = e => fieldKeywords.some(k => e.name.toLowerCase().includes(k));
-  // An event is done if es=r, or if its ua timestamp is older than the current anchor's ua
-  // This handles cases where es stays as eh/hr even after event completes
-  const anchorUaTime = mostRecentDone?.raw.ua ? new Date(mostRecentDone.raw.ua).getTime() : 0;
-  const isDone = e => {
-    if (e.raw.es === 'r') return true;
-    if (e.raw.es === 'hr' && e.raw.resd) return true;
-    // If event's ua is older than anchor's ua and it's not the anchor itself, treat as done
-    const eUa = e.raw.ua ? new Date(e.raw.ua).getTime() : 0;
-    return eUa < anchorUaTime && e.origIndex !== mostRecentDone?.origIndex;
-  };
-
   const trackEvents = events.map((e,i) => ({...e, origIndex: i})).filter(e => !isField(e));
 
-  // Rely purely on most recent resd timestamp to anchor position — hr status is unreliable
   const ageGroup = e => { const m = e.name.match(/(\d+)[-–](\d+)\s*Year/i); return m ? parseInt(m[1]) : 999; };
   const sortKey = (a,b) => (a.raw.sk??0)-(b.raw.sk??0) || ageGroup(a)-ageGroup(b) || a.origIndex-b.origIndex;
-  // Use 'ua' (updated-at) timestamp — most recently updated track event is the live one
+
+  // Use ua timestamp to find where the meet is
   const allByUa = trackEvents.filter(e => e.raw.ua);
   allByUa.sort((a,b) => new Date(b.raw.ua) - new Date(a.raw.ua));
   const top5 = allByUa.slice(0,5).map(e => e.name + ' [ua=' + e.raw.ua + ',es=' + e.raw.es + ']').join(' | ');
   log(`Top 5 by ua: ${top5}`);
 
-  // Most recently updated event (any status) = where the meet is right now
-  // If it was updated within 20 min, treat it as current; otherwise use most recent r/hr as anchor
+  // Most recently updated event = anchor for where meet is
   const mostRecentAny = allByUa[0];
   const uaAgeMs = mostRecentAny?.raw.ua ? Date.now() - new Date(mostRecentAny.raw.ua).getTime() : Infinity;
   const doneWithTime = uaAgeMs < 20 * 60 * 1000
-    ? allByUa  // use all events sorted by ua
+    ? allByUa
     : allByUa.filter(e => e.raw.es === 'r' || e.raw.es === 'hr');
   const mostRecentDone = doneWithTime[0];
+
+  // isDone: es=r, or ua older than anchor (event ran before current position)
+  const anchorUaTime = mostRecentDone?.raw.ua ? new Date(mostRecentDone.raw.ua).getTime() : 0;
+  const isDone = e => {
+    if (e.raw.es === 'r') return true;
+    if (e.raw.es === 'hr' && e.raw.resd) return true;
+    const eUa = e.raw.ua ? new Date(e.raw.ua).getTime() : 0;
+    return eUa < anchorUaTime && e.origIndex !== mostRecentDone?.origIndex;
+  };
 
   let currentLiveIndex = -1;
   if (mostRecentDone) {
