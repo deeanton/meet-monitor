@@ -267,7 +267,11 @@ async function fetchMeetData() {
           session.evs.forEach(ev => {
             if (ev && ev.n && ev.enu !== undefined) {
               const num = parseInt(ev.enu);
-              if (!isNaN(num)) runOrderMap[ev.n] = num;
+              const key = ev.n.trim();
+              // If duplicate, keep the lower (earlier) enu
+              if (!isNaN(num) && (!runOrderMap[key] || num < runOrderMap[key])) {
+                runOrderMap[key] = num;
+              }
             }
           });
         }
@@ -369,9 +373,21 @@ function parseFirebase(json, target, liveData, runOrderMap) {
         eventsAwayCount = between.length + 1;
         log(`Events away by sd: ${eventsAwayCount}`);
       } else if (Object.keys(runOrderMap).length > 0) {
-        // Use the meet's actual running order from liveRunEventList
-        const currentOrder = runOrderMap[current.name];
-        const targetOrder = runOrderMap[target.name];
+        // Use the meet's actual running order from session_detail
+        const lookupOrder = (name) => {
+          if (runOrderMap[name] !== undefined) return runOrderMap[name];
+          const trimmed = name.trim();
+          if (runOrderMap[trimmed] !== undefined) return runOrderMap[trimmed];
+          // Case-insensitive fallback
+          const lower = trimmed.toLowerCase();
+          for (const k of Object.keys(runOrderMap)) {
+            if (k.toLowerCase() === lower) return runOrderMap[k];
+          }
+          return undefined;
+        };
+        const currentOrder = lookupOrder(current.name);
+        const targetOrder = lookupOrder(target.name);
+        log(`Run order lookup: current="${current.name}" → ${currentOrder}, target="${target.name}" → ${targetOrder}`);
         if (currentOrder !== undefined && targetOrder !== undefined) {
           // Count undone track events whose run order is between current and target
           const between = trackEvents.filter(e => {
