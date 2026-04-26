@@ -296,6 +296,7 @@ function parseFirebase(json, target) {
     const undone = allSorted.filter(e => !isDone(e));
     const donePos = allSorted.findIndex(e => e.origIndex === mostRecentDone.origIndex);
     const next = undone.find(e => allSorted.findIndex(x => x.origIndex === e.origIndex) > donePos) || undone[0];
+    log(`Anchor: "${mostRecentDone?.name}" → Next: "${next?.name ?? 'none'}"`);
     if (next) currentLiveIndex = next.origIndex;
   }
 
