@@ -243,18 +243,26 @@ async function fetchMeetData() {
 
   log(`meetId=${meetId}, fetching...`);
 
-  const firebaseUrl = `https://trackmeet-io.firebaseio.com/meet_${meetId}/event_summary.json`;
-  const r = await fetchWithTimeout(firebaseUrl, {}, 12000);
-  if (!r.ok) throw new Error(`Firebase returned ${r.status}`);
+  // Fetch both event summary AND the live event data in parallel
+  const [summaryResp, liveResp] = await Promise.all([
+    fetchWithTimeout(`https://trackmeet-io.firebaseio.com/meet_${meetId}/event_summary.json`, {}, 12000),
+    fetchWithTimeout(`https://trackmeet-io.firebaseio.com/meet_${meetId}/liveRunEvent.json`, {}, 12000)
+  ]);
 
-  const json = await r.json();
+  if (!summaryResp.ok) throw new Error(`Firebase summary returned ${summaryResp.status}`);
+  const json = await summaryResp.json();
   if (!json) throw new Error('Firebase returned null — meet may not be live yet');
 
+  let liveData = null;
+  if (liveResp.ok) {
+    liveData = await liveResp.json();
+  }
+
   log(`Got ${Object.keys(json).length} events from Firebase`, 'ok');
-  return parseFirebase(json, target);
+  return parseFirebase(json, target, liveData);
 }
 
-function parseFirebase(json, target) {
+function parseFirebase(json, target, liveData) {
   const tLow = target.toLowerCase();
   // Each key is like "Individual-2290263", value has name, status, sortOrder etc.
   const entries = Object.values(json);
@@ -296,11 +304,29 @@ function parseFirebase(json, target) {
   // isDone: only trust es=r (results posted). Don't infer done from ua.
   const isDone = e => e.raw.es === 'r' || (e.raw.es === 'hr' && e.raw.resd);
 
-  // Use the most recently updated track event as current — most reliable signal
   let currentLiveIndex = -1;
-  if (mostRecentDone) {
+
+  // PRIORITY 1: Use liveRunEvent data if available — most authoritative source
+  let liveEventName = null;
+  if (liveData) {
+    // liveData has track and/or field keys, each with event details
+    const liveTracks = Object.values(liveData).filter(v => v && v.n);
+    if (liveTracks.length > 0) {
+      // Prefer track over field for primary "current" event
+      const liveTrack = liveData.track && liveData.track.n ? liveData.track : liveTracks[0];
+      liveEventName = liveTrack.n;
+      const matchIdx = events.findIndex(e => e.name === liveEventName);
+      if (matchIdx >= 0) {
+        currentLiveIndex = matchIdx;
+        log(`Current (live): "${liveEventName}"`);
+      }
+    }
+  }
+
+  // FALLBACK: most recently updated event from event_summary
+  if (currentLiveIndex < 0 && mostRecentDone) {
     currentLiveIndex = mostRecentDone.origIndex;
-    log(`Current: "${mostRecentDone.name}" (es=${mostRecentDone.raw.es}, ua=${mostRecentDone.raw.ua})`);
+    log(`Current (fallback): "${mostRecentDone.name}" (es=${mostRecentDone.raw.es})`);
   }
 
   const targetIndex = events.findIndex(e => e.name.toLowerCase().includes(tLow));
