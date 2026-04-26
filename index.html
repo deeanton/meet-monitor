@@ -188,7 +188,10 @@ function updateUI() {
   if (eventsAway !== null && eventsAway > 0) {
     let etaTxt = `~${eventsAway} event${eventsAway !== 1 ? 's' : ''} away`;
     if (state.totalHeatsAway !== null && state.avgMinutesPerHeat) {
-      const mins = Math.round(state.totalHeatsAway * state.avgMinutesPerHeat);
+      const rawMins = state.totalHeatsAway * state.avgMinutesPerHeat;
+      // Subtract time elapsed since last check
+      const elapsedMins = state.lastCheckTime ? (Date.now() - state.lastCheckTime.getTime()) / 60000 : 0;
+      const mins = Math.max(0, Math.round(rawMins - elapsedMins));
       etaTxt += mins >= 60 ? ` · ~${Math.floor(mins/60)}h ${mins%60}m` : ` · ~${mins} min`;
     }
     etaEl.textContent = etaTxt;
@@ -296,7 +299,7 @@ function parseFirebase(json, target) {
     // If most recently updated event is hr AND updated within last 10 min, it's live
     const ageNow = Date.now();
     const uaAge = mostRecentDone.raw.ua ? ageNow - new Date(mostRecentDone.raw.ua).getTime() : Infinity;
-    const isRecentlyActive = mostRecentDone.raw.es === 'hr' && uaAge < 10 * 60 * 1000;
+    const isRecentlyActive = mostRecentDone.raw.es === 'hr' && uaAge < 20 * 60 * 1000;
     if (isRecentlyActive) {
       currentLiveIndex = mostRecentDone.origIndex;
       log(`Current (hr, ${Math.round(uaAge/1000)}s ago): "${mostRecentDone.name}"`);
@@ -465,6 +468,9 @@ function dismissAlert() {
 }
 
 // Wire up buttons
+// Refresh ETA display every minute so it counts down between checks
+setInterval(() => { if (state.lastCheckTime) updateUI(); }, 60000);
+
 document.getElementById('btnStart').addEventListener('click', startMonitoring);
 document.getElementById('btnCheck').addEventListener('click', checkNow);
 document.getElementById('btnStop').addEventListener('click', stopMonitoring);
