@@ -243,11 +243,11 @@ async function fetchMeetData() {
 
   log(`meetId=${meetId}, fetching...`);
 
-  // Fetch event summary, live event, AND the ordered event list in parallel
-  const [summaryResp, liveResp, listResp] = await Promise.all([
+  // Fetch event summary, live event, AND the schedule in parallel
+  const [summaryResp, liveResp, schedResp] = await Promise.all([
     fetchWithTimeout(`https://trackmeet-io.firebaseio.com/meet_${meetId}/event_summary.json`, {}, 12000),
     fetchWithTimeout(`https://trackmeet-io.firebaseio.com/meet_${meetId}/liveRunEvent.json`, {}, 12000),
-    fetchWithTimeout(`https://trackmeet-io.firebaseio.com/meet_${meetId}/liveRunEventList.json`, {}, 15000)
+    fetchWithTimeout(`https://trackmeet-io.firebaseio.com/meet_${meetId}/session_detail.json`, {}, 15000)
   ]);
 
   if (!summaryResp.ok) throw new Error(`Firebase summary returned ${summaryResp.status}`);
@@ -257,29 +257,32 @@ async function fetchMeetData() {
   let liveData = null;
   if (liveResp.ok) liveData = await liveResp.json();
 
-  let eventList = null;
-  if (listResp.ok) eventList = await listResp.json();
+  // Build event-name → run-order map from session_detail (uses 'enu' field)
+  let runOrderMap = {};
+  if (schedResp.ok) {
+    const sched = await schedResp.json();
+    if (sched) {
+      Object.values(sched).forEach(session => {
+        if (session && session.evs) {
+          session.evs.forEach(ev => {
+            if (ev && ev.n && ev.enu !== undefined) {
+              const num = parseInt(ev.enu);
+              if (!isNaN(num)) runOrderMap[ev.n] = num;
+            }
+          });
+        }
+      });
+    }
+  }
 
-  log(`Got ${Object.keys(json).length} events from Firebase`, 'ok');
-  return parseFirebase(json, target, liveData, eventList);
+  log(`Got ${Object.keys(json).length} events, ${Object.keys(runOrderMap).length} in schedule`, 'ok');
+  return parseFirebase(json, target, liveData, runOrderMap);
 }
 
-function parseFirebase(json, target, liveData, eventList) {
+function parseFirebase(json, target, liveData, runOrderMap) {
   const tLow = target.toLowerCase();
   // Each key is like "Individual-2290263", value has name, status, sortOrder etc.
   const entries = Object.values(json);
-
-  // Build running order map from liveRunEventList — key 'i' field is the meet event number
-  const runOrderMap = {};
-  if (eventList) {
-    Object.values(eventList).forEach(item => {
-      if (item && item.n && item.i !== undefined) {
-        const orderNum = parseInt(item.i);
-        if (!isNaN(orderNum)) runOrderMap[item.n] = orderNum;
-      }
-    });
-    log(`Loaded run order for ${Object.keys(runOrderMap).length} events`);
-  }
 
   // Sort by sort_order or event_number if available
   entries.sort((a, b) => {
