@@ -331,7 +331,7 @@ function parseFirebase(json, target, liveData) {
 
   const targetIndex = events.findIndex(e => e.name.toLowerCase().includes(tLow));
 
-  // Use scheduled start time (sd) to determine running order — that's the true sort key
+  // Try sd-based count first; if all events share the same sd, fall back to undone count
   let eventsAwayCount = null;
   if (currentLiveIndex >= 0 && targetIndex >= 0) {
     const current = events[currentLiveIndex];
@@ -341,15 +341,22 @@ function parseFirebase(json, target, liveData) {
     } else {
       const currentSd = current.raw.sd ? new Date(current.raw.sd).getTime() : 0;
       const targetSd = target.raw.sd ? new Date(target.raw.sd).getTime() : 0;
-      // Count undone track events with sd between current and target
-      const between = trackEvents.filter(e => {
-        if (isDone(e)) return false;
-        if (e.origIndex === currentLiveIndex || e.origIndex === targetIndex) return false;
-        const eSd = e.raw.sd ? new Date(e.raw.sd).getTime() : 0;
-        return eSd > currentSd && eSd <= targetSd;
-      });
-      eventsAwayCount = between.length + 1; // +1 for the target itself
-      log(`Events away by sd: ${eventsAwayCount} (between current sd=${current.raw.sd} and target sd=${target.raw.sd})`);
+      if (currentSd && targetSd && currentSd !== targetSd) {
+        // sd values differ — use them
+        const between = trackEvents.filter(e => {
+          if (isDone(e)) return false;
+          if (e.origIndex === currentLiveIndex || e.origIndex === targetIndex) return false;
+          const eSd = e.raw.sd ? new Date(e.raw.sd).getTime() : 0;
+          return eSd > currentSd && eSd <= targetSd;
+        });
+        eventsAwayCount = between.length + 1;
+        log(`Events away by sd: ${eventsAwayCount}`);
+      } else {
+        // All events share same sd — fall back to total undone count (rough upper bound)
+        const undoneCount = trackEvents.filter(e => !isDone(e) && e.origIndex !== targetIndex).length;
+        eventsAwayCount = undoneCount;
+        log(`Events away (rough upper bound, sd not usable): ${eventsAwayCount}`);
+      }
     }
   }
 
