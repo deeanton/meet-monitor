@@ -243,10 +243,11 @@ async function fetchMeetData() {
 
   log(`meetId=${meetId}, fetching...`);
 
-  // Fetch both event summary AND the live event data in parallel
-  const [summaryResp, liveResp] = await Promise.all([
+  // Fetch event summary, live event, AND the ordered event list in parallel
+  const [summaryResp, liveResp, listResp] = await Promise.all([
     fetchWithTimeout(`https://trackmeet-io.firebaseio.com/meet_${meetId}/event_summary.json`, {}, 12000),
-    fetchWithTimeout(`https://trackmeet-io.firebaseio.com/meet_${meetId}/liveRunEvent.json`, {}, 12000)
+    fetchWithTimeout(`https://trackmeet-io.firebaseio.com/meet_${meetId}/liveRunEvent.json`, {}, 12000),
+    fetchWithTimeout(`https://trackmeet-io.firebaseio.com/meet_${meetId}/liveRunEventList.json`, {}, 15000)
   ]);
 
   if (!summaryResp.ok) throw new Error(`Firebase summary returned ${summaryResp.status}`);
@@ -254,18 +255,31 @@ async function fetchMeetData() {
   if (!json) throw new Error('Firebase returned null — meet may not be live yet');
 
   let liveData = null;
-  if (liveResp.ok) {
-    liveData = await liveResp.json();
-  }
+  if (liveResp.ok) liveData = await liveResp.json();
+
+  let eventList = null;
+  if (listResp.ok) eventList = await listResp.json();
 
   log(`Got ${Object.keys(json).length} events from Firebase`, 'ok');
-  return parseFirebase(json, target, liveData);
+  return parseFirebase(json, target, liveData, eventList);
 }
 
-function parseFirebase(json, target, liveData) {
+function parseFirebase(json, target, liveData, eventList) {
   const tLow = target.toLowerCase();
   // Each key is like "Individual-2290263", value has name, status, sortOrder etc.
   const entries = Object.values(json);
+
+  // Build running order map from liveRunEventList — key 'i' field is the meet event number
+  const runOrderMap = {};
+  if (eventList) {
+    Object.values(eventList).forEach(item => {
+      if (item && item.n && item.i !== undefined) {
+        const orderNum = parseInt(item.i);
+        if (!isNaN(orderNum)) runOrderMap[item.n] = orderNum;
+      }
+    });
+    log(`Loaded run order for ${Object.keys(runOrderMap).length} events`);
+  }
 
   // Sort by sort_order or event_number if available
   entries.sort((a, b) => {
@@ -351,36 +365,26 @@ function parseFirebase(json, target, liveData) {
         });
         eventsAwayCount = between.length + 1;
         log(`Events away by sd: ${eventsAwayCount}`);
-      } else {
-        // Infer running order from completed events (sorted by resd or ua)
-        // Pattern: events similar to those completed recently are likely next
-        // Heuristic: count undone track events that share a "category" with recently done events
-        const recentDone = trackEvents.filter(e => isDone(e) && (e.raw.resd || e.raw.ua))
-          .sort((a,b) => new Date(b.raw.resd || b.raw.ua) - new Date(a.raw.resd || a.raw.ua))
-          .slice(0, 5);
-        // Get distance keywords from recently done events (e.g. "800m", "400m")
-        const recentDistances = new Set();
-        recentDone.forEach(e => {
-          const m = e.name.match(/(\d+)m/i);
-          if (m) recentDistances.add(m[1]);
-        });
-        const targetMatch = events[targetIndex].name.match(/(\d+)m/i);
-        const targetDist = targetMatch ? targetMatch[1] : null;
-
-        // If target is in same distance category as recent events, count remaining at that distance
-        if (targetDist && recentDistances.has(targetDist)) {
-          // Count undone events at the same distance, ordered by typical age progression
-          const sameDist = trackEvents.filter(e => !isDone(e) && e.name.includes(targetDist + 'm'));
-          const tgtPos = sameDist.findIndex(e => e.origIndex === targetIndex);
-          eventsAwayCount = tgtPos >= 0 ? tgtPos : sameDist.length;
-          log(`Events away (same distance ${targetDist}m): ${eventsAwayCount}`);
+      } else if (Object.keys(runOrderMap).length > 0) {
+        // Use the meet's actual running order from liveRunEventList
+        const currentOrder = runOrderMap[current.name];
+        const targetOrder = runOrderMap[target.name];
+        if (currentOrder !== undefined && targetOrder !== undefined) {
+          // Count undone track events whose run order is between current and target
+          const between = trackEvents.filter(e => {
+            if (isDone(e)) return false;
+            const o = runOrderMap[e.name];
+            return o !== undefined && o > currentOrder && o <= targetOrder;
+          });
+          eventsAwayCount = between.length;
+          log(`Events away by run order (${currentOrder} → ${targetOrder}): ${eventsAwayCount}`);
         } else {
-          // Different distance — count undone events at recent distances + events at target distance up to target
-          const sameDistAhead = targetDist ? trackEvents.filter(e => !isDone(e) && e.name.includes(targetDist + 'm')).length : 0;
-          const otherUndone = trackEvents.filter(e => !isDone(e) && e.origIndex !== targetIndex && (!targetDist || !e.name.includes(targetDist + 'm'))).length;
-          eventsAwayCount = otherUndone + sameDistAhead;
-          log(`Events away (cross-distance estimate): ${eventsAwayCount}`);
+          eventsAwayCount = trackEvents.filter(e => !isDone(e) && e.origIndex !== targetIndex).length;
+          log(`Events away (run order missing for current/target): ${eventsAwayCount}`);
         }
+      } else {
+        eventsAwayCount = trackEvents.filter(e => !isDone(e) && e.origIndex !== targetIndex).length;
+        log(`Events away (no run order data): ${eventsAwayCount}`);
       }
     }
   }
