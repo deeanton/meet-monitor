@@ -293,16 +293,21 @@ function parseFirebase(json, target) {
   let currentLiveIndex = -1;
   if (mostRecentDone) {
     const allSorted = [...trackEvents].sort(sortKey);
-    // If most recently updated event is still running (hr), it IS the current event
-    if (mostRecentDone.raw.es === 'hr') {
+    // If most recently updated event is hr AND updated within last 10 min, it's live
+    const ageNow = Date.now();
+    const uaAge = mostRecentDone.raw.ua ? ageNow - new Date(mostRecentDone.raw.ua).getTime() : Infinity;
+    const isRecentlyActive = mostRecentDone.raw.es === 'hr' && uaAge < 10 * 60 * 1000;
+    if (isRecentlyActive) {
       currentLiveIndex = mostRecentDone.origIndex;
-      log(`Current (hr): "${mostRecentDone.name}"`);
+      log(`Current (hr, ${Math.round(uaAge/1000)}s ago): "${mostRecentDone.name}"`);
     } else {
-      // It's done — find the next undone event after it
+      // Find most recently updated DONE event as anchor
+      const lastDone = doneWithTime.find(e => e.raw.es === 'r' || (e.raw.es === 'hr' && !isRecentlyActive));
+      const anchor = doneWithTime.find(e => e.raw.es === 'r') || mostRecentDone;
       const undone = allSorted.filter(e => !isDone(e));
-      const donePos = allSorted.findIndex(e => e.origIndex === mostRecentDone.origIndex);
+      const donePos = allSorted.findIndex(e => e.origIndex === anchor.origIndex);
       const next = undone.find(e => allSorted.findIndex(x => x.origIndex === e.origIndex) > donePos) || undone[0];
-      log(`Anchor: "${mostRecentDone.name}" → Next: "${next?.name ?? 'none'}"`);
+      log(`Anchor: "${anchor.name}" → Next: "${next?.name ?? 'none'}"`);
       if (next) currentLiveIndex = next.origIndex;
     }
   }
