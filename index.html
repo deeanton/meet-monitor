@@ -333,13 +333,16 @@ function parseFirebase(json, target) {
   // Estimate minutes per heat using today's completed track events weighted by heat count
   let avgMinutesPerHeat = null;
   const todayStr = new Date().toISOString().slice(0,10);
-  const recentDone = trackEvents.filter(e => isDone(e) && e.raw.resd && e.raw.resd.startsWith(todayStr));
-  recentDone.sort((a,b) => new Date(a.raw.resd) - new Date(b.raw.resd));
+  const allDoneToday = trackEvents.filter(e => isDone(e) && e.raw.resd && e.raw.resd.startsWith(todayStr));
+  allDoneToday.sort((a,b) => new Date(a.raw.resd) - new Date(b.raw.resd));
+  // Use only the 10 most recently completed events for pace estimate
+  const recentDone = allDoneToday.slice(-10);
   if (recentDone.length >= 2) {
     const times = recentDone.map(e => new Date(e.raw.resd).getTime());
     const spanMs = times[times.length-1] - times[0];
     const totalHeats = recentDone.reduce((sum, e) => sum + (e.raw.nh || 1), 0);
     avgMinutesPerHeat = (spanMs / 60000) / totalHeats;
+    log(`Pace: ${avgMinutesPerHeat.toFixed(1)} min/heat from last ${recentDone.length} events`);
   }
 
   // Count total heats remaining between current (exclusive) and target (inclusive)
