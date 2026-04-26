@@ -1,4 +1,5 @@
 <!DOCTYPE html>
+
 <html lang="en">
 <head>
 <meta charset="UTF-8">
@@ -79,7 +80,7 @@
 <div class="card">
   <div class="card-label">Configuration</div>
   <label>Meet URL</label>
-  <input id="meetUrl" type="url" value="https://live.finallaptiminggroup.com/meets/60830">
+  <input id="meetUrl" type="url" value="https://live.finallaptiminggroup.com/meets/70048">
   <label>Target Event</label>
   <input id="targetEvent" type="text" value="Girls 4x400">
   <div class="row">
@@ -129,7 +130,8 @@ let state = {
   targetIndex: -1,
   alertFired: false,
   lastCheckTime: null,
-  avgMinutesPerEvent: null,
+  avgMinutesPerHeat: null,
+  totalHeatsAway: null,
   eventsAwayCount: null,
 };
 
@@ -185,8 +187,8 @@ function updateUI() {
   const eventsAway = state.eventsAwayCount;
   if (eventsAway !== null && eventsAway > 0) {
     let etaTxt = `~${eventsAway} event${eventsAway !== 1 ? 's' : ''} away`;
-    if (state.avgMinutesPerEvent) {
-      const mins = Math.round(eventsAway * state.avgMinutesPerEvent);
+    if (state.totalHeatsAway !== null && state.avgMinutesPerHeat) {
+      const mins = Math.round(state.totalHeatsAway * state.avgMinutesPerHeat);
       etaTxt += mins >= 60 ? ` · ~${Math.floor(mins/60)}h ${mins%60}m` : ` · ~${mins} min`;
     }
     etaEl.textContent = etaTxt;
@@ -267,7 +269,7 @@ function parseFirebase(json, target) {
     const name = e.n || e.abn || e.ab || e.name || JSON.stringify(e).slice(0,40);
     const status = (e.es || e.ss || e.status || '').toString().toLowerCase();
     const isLive = status === 'hr' || status === 'l' || status === 'live' || status === 'active';
-    return { name, isLive, raw: e };
+    return { name, isLive, raw: { es: e.es, resd: e.resd, ua: e.ua, sk: e.sk, nh: e.nh } };
   });
 
   const nonDone = events.filter(e => e.raw.es === 'hr');
@@ -281,12 +283,12 @@ function parseFirebase(json, target) {
   // Rely purely on most recent resd timestamp to anchor position — hr status is unreliable
   const ageGroup = e => { const m = e.name.match(/(\d+)[-–](\d+)\s*Year/i); return m ? parseInt(m[1]) : 999; };
   const sortKey = (a,b) => (a.raw.sk??0)-(b.raw.sk??0) || ageGroup(a)-ageGroup(b) || a.origIndex-b.origIndex;
-  const now = Date.now();
-  // Only trust resd timestamps that are actually in the past
-  const doneWithTime = trackEvents.filter(e => isDone(e) && e.raw.resd && new Date(e.raw.resd).getTime() < now);
-  doneWithTime.sort((a,b) => new Date(b.raw.resd) - new Date(a.raw.resd));
+  // Use 'ua' (updated-at) timestamp — most recently updated track event is the live one
+  const doneWithTime = trackEvents.filter(e => e.raw.ua);
+  doneWithTime.sort((a,b) => new Date(b.raw.ua) - new Date(a.raw.ua));
   const mostRecentDone = doneWithTime[0];
-  log(`Most recent done: "${mostRecentDone?.name}" resd=${mostRecentDone?.raw.resd}`);
+  const top5 = doneWithTime.slice(0,5).map(e => e.name + ' [ua=' + e.raw.ua + ',es=' + e.raw.es + ']').join(' | ');
+  log(`Top 5 by ua: ${top5}`);
 
   let currentLiveIndex = -1;
   if (mostRecentDone) {
@@ -315,18 +317,31 @@ function parseFirebase(json, target) {
     }
     }
 
-  // Estimate time per event using only TODAY's completed track events
-  let avgMinutesPerEvent = null;
+  // Estimate minutes per heat using today's completed track events weighted by heat count
+  let avgMinutesPerHeat = null;
   const todayStr = new Date().toISOString().slice(0,10);
   const recentDone = trackEvents.filter(e => isDone(e) && e.raw.resd && e.raw.resd.startsWith(todayStr));
   recentDone.sort((a,b) => new Date(a.raw.resd) - new Date(b.raw.resd));
   if (recentDone.length >= 2) {
     const times = recentDone.map(e => new Date(e.raw.resd).getTime());
     const spanMs = times[times.length-1] - times[0];
-    avgMinutesPerEvent = (spanMs / 60000) / (times.length - 1);
-    }
+    const totalHeats = recentDone.reduce((sum, e) => sum + (e.raw.nh || 1), 0);
+    avgMinutesPerHeat = (spanMs / 60000) / totalHeats;
+  }
 
-  return { events, currentLiveIndex, targetIndex, eventsAwayCount, avgMinutesPerEvent };
+  // Count total heats remaining between current (exclusive) and target (inclusive)
+  let totalHeatsAway = null;
+  if (eventsAwayCount !== null && currentLiveIndex >= 0 && targetIndex >= 0) {
+    const allSorted2 = [...trackEvents].sort(sortKey);
+    const undone2 = allSorted2.filter(e => !isDone(e));
+    const curPos2 = undone2.findIndex(e => e.origIndex === currentLiveIndex);
+    const tgtPos2 = undone2.findIndex(e => e.origIndex === targetIndex);
+    if (curPos2 >= 0 && tgtPos2 >= 0) {
+      totalHeatsAway = undone2.slice(curPos2, tgtPos2).reduce((sum, e) => sum + (e.raw.nh || 1), 0);
+    }
+  }
+
+  return { events, currentLiveIndex, targetIndex, eventsAwayCount, avgMinutesPerHeat, totalHeatsAway };
 }
 
 function normalize(events, target) {
@@ -348,7 +363,8 @@ async function doCheck() {
     state.events = result.events;
     state.currentLiveIndex = result.currentLiveIndex;
     state.targetIndex = result.targetIndex;
-    state.avgMinutesPerEvent = result.avgMinutesPerEvent;
+    state.avgMinutesPerHeat = result.avgMinutesPerHeat;
+    state.totalHeatsAway = result.totalHeatsAway;
     state.eventsAwayCount = result.eventsAwayCount;
     state.lastCheckTime = new Date();
 
@@ -356,8 +372,8 @@ async function doCheck() {
     const targetName = state.targetIndex >= 0 ? state.events[state.targetIndex]?.name : 'not found';
     const eventsAway = state.eventsAwayCount;
     let etaStr = eventsAway !== null ? eventsAway + ' events away' : '?';
-    if (eventsAway !== null && state.avgMinutesPerEvent) {
-      const mins = Math.round(eventsAway * state.avgMinutesPerEvent);
+    if (state.totalHeatsAway !== null && state.avgMinutesPerHeat) {
+      const mins = Math.round(state.totalHeatsAway * state.avgMinutesPerHeat);
       etaStr += mins >= 60 ? ` (~${Math.floor(mins/60)}h ${mins%60}m)` : ` (~${mins}m)`;
     }
     log(`Live: "${liveName}" | Target: "${targetName}" | ETA: ${etaStr}`, 'ok');
@@ -442,5 +458,6 @@ document.getElementById('btnResetAlert').addEventListener('click', () => {
   log('Alert reset — will fire again when threshold reached.', 'warn');
 });
 </script>
+
 </body>
 </html>
