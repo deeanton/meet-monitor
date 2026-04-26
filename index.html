@@ -293,11 +293,18 @@ function parseFirebase(json, target) {
   let currentLiveIndex = -1;
   if (mostRecentDone) {
     const allSorted = [...trackEvents].sort(sortKey);
-    const undone = allSorted.filter(e => !isDone(e));
-    const donePos = allSorted.findIndex(e => e.origIndex === mostRecentDone.origIndex);
-    const next = undone.find(e => allSorted.findIndex(x => x.origIndex === e.origIndex) > donePos) || undone[0];
-    log(`Anchor: "${mostRecentDone?.name}" → Next: "${next?.name ?? 'none'}"`);
-    if (next) currentLiveIndex = next.origIndex;
+    // If most recently updated event is still running (hr), it IS the current event
+    if (mostRecentDone.raw.es === 'hr') {
+      currentLiveIndex = mostRecentDone.origIndex;
+      log(`Current (hr): "${mostRecentDone.name}"`);
+    } else {
+      // It's done — find the next undone event after it
+      const undone = allSorted.filter(e => !isDone(e));
+      const donePos = allSorted.findIndex(e => e.origIndex === mostRecentDone.origIndex);
+      const next = undone.find(e => allSorted.findIndex(x => x.origIndex === e.origIndex) > donePos) || undone[0];
+      log(`Anchor: "${mostRecentDone.name}" → Next: "${next?.name ?? 'none'}"`);
+      if (next) currentLiveIndex = next.origIndex;
+    }
   }
 
   const targetIndex = events.findIndex(e => e.name.toLowerCase().includes(tLow));
