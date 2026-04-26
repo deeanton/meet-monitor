@@ -297,14 +297,8 @@ function parseFirebase(json, target) {
     : allByUa.filter(e => e.raw.es === 'r' || e.raw.es === 'hr');
   const mostRecentDone = doneWithTime[0];
 
-  // isDone: es=r, or ua older than anchor (event ran before current position)
-  const anchorUaTime = mostRecentDone?.raw.ua ? new Date(mostRecentDone.raw.ua).getTime() : 0;
-  const isDone = e => {
-    if (e.raw.es === 'r') return true;
-    if (e.raw.es === 'hr' && e.raw.resd) return true;
-    const eUa = e.raw.ua ? new Date(e.raw.ua).getTime() : 0;
-    return eUa < anchorUaTime && e.origIndex !== mostRecentDone?.origIndex;
-  };
+  // isDone: only trust es=r (results posted). Don't infer done from ua.
+  const isDone = e => e.raw.es === 'r' || (e.raw.es === 'hr' && e.raw.resd);
 
   let currentLiveIndex = -1;
   if (mostRecentDone) {
@@ -323,7 +317,9 @@ function parseFirebase(json, target) {
       const undone = allSorted.filter(e => !isDone(e));
       const donePos = allSorted.findIndex(e => e.origIndex === anchor.origIndex);
       const next = undone.find(e => allSorted.findIndex(x => x.origIndex === e.origIndex) > donePos) || undone[0];
-      log(`Anchor: "${anchor.name}" → Next: "${next?.name ?? 'none'}"`);
+      const undoneNames = undone.slice(0,8).map(e=>e.name).join(' | ');
+    log(`Undone (first 8): ${undoneNames}`);
+    log(`Anchor: "${anchor.name}" sk=${anchor.raw.sk} → Next: "${next?.name ?? 'none'}"`);
       if (next) currentLiveIndex = next.origIndex;
     }
   }
